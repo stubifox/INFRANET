@@ -2,10 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { PythonShell } from "python-shell";
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import Chat from "./Chat";
+import { Paper, Grid, Container, Box } from "@material-ui/core";
+import { ThemeProvider } from "@material-ui/styles";
+import { ChatInput } from "./ChatInput";
+import { ChatWindow } from "./ChatWindow";
+import { createMuiTheme } from "@material-ui/core/styles";
 
-const App = props => {
+const darkTheme = createMuiTheme({
+  palette: {
+    type: "dark"
+  }
+});
+
+const App = () => {
   const [msg, setmsg] = useState("loading...");
 
   useEffect(() => {
@@ -30,12 +39,13 @@ const App = props => {
   }, []);
 
   return (
-    <div>
-      <MuiThemeProvider>
-        <Chat />
-      </MuiThemeProvider>
-      <div>{msg}</div>
-    </div>
+    // <ThemeProvider theme="">
+    <Box>
+      <ChatWindow />
+      <ChatInput />
+      <Box>{msg}</Box>
+    </Box>
+    // </ThemeProvider>
   );
 };
 export default App;
