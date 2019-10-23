@@ -26,7 +26,7 @@ chat@infranet:~$ npm install -g yarn
 
 ```console
 chat@infranet:~$ git clone <hier ssh oder https von dem repo> #moeglicherweise muesst ihr euch noch ein ssh key anlegen
-chat@infranet:~$ cd electron-react-python-app
+chat@infranet:~$ cd INFRANET
 chat@infranet:~$ pyvenv venv
 chat@infranet:~$ source venv/bin/activate
 chat@infranet:~$ yarn
