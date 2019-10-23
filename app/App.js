@@ -1,22 +1,20 @@
 "use babel";
 
-import React from "react";
-import PythonShell from "python-shell";
+import React, { useState, useEffect } from "react";
+import { PythonShell } from "python-shell";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import Chat from "./Chat";
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      msg: "loading..." || []
-    };
-  }
+const App = props => {
+  const [msg, setmsg] = useState("loading...");
 
-  componentDidMount() {
+  useEffect(() => {
+    const platform = navigator.platform;
     let options = {
       mode: "text",
-      pythonPath: "venv/bin/python",
+      pythonPath: platform.includes("Win")
+        ? "venv/Scripts/python"
+        : "venv/bin/python",
       pythonOptions: ["-u"],
       scriptPath: "app/",
       args: ["value1", 10]
@@ -25,20 +23,19 @@ export default class App extends React.Component {
       if (err) {
         console.error("Got error: ", err);
       } else {
-        this.setState({ msg: results });
+        setmsg(results);
         console.log(results[1]);
       }
     });
-  }
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <MuiThemeProvider>
-          <Chat />
-        </MuiThemeProvider>
-        <div>{this.state.msg}</div>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <MuiThemeProvider>
+        <Chat />
+      </MuiThemeProvider>
+      <div>{msg}</div>
+    </div>
+  );
+};
+export default App;
