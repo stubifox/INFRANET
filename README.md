@@ -27,8 +27,9 @@ chat@infranet:~$ npm install -g yarn
 ```console
 chat@infranet:~$ git clone <hier ssh oder https von dem repo> #moeglicherweise muesst ihr euch noch ein ssh key anlegen
 chat@infranet:~$ cd INFRANET
-chat@infranet:~$ pyvenv venv
-chat@infranet:~$ source venv/bin/activate
+chat@infranet:~$ python -m venv venv
+(chat@infranet:~$ source venv/bin/activate #Linux oder Mac)
+chat@infranet:~$ source venv/Scripts/activate #Windows
 chat@infranet:~$ yarn
 chat@infranet:~$ yarn start
 
