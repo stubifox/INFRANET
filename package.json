@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "main": "bootstrapper.js",
   "license": "MIT",
-  "repository": "https://gitlab.com/avilay/electron-react-python-app",
+  "repository": "https://github.com/stubifox/INFRANET",
   "scripts": {
     "start": "electron ."
   },

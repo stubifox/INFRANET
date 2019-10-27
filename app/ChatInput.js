@@ -1,35 +1,34 @@
 import React, { useState } from "react";
-import { Button, TextField, Grid, Container, Box } from "@material-ui/core";
-import SendTwoToneIcon from "@material-ui/icons/SendTwoTone";
+import { TextField, Container, IconButton, Box } from "@material-ui/core";
+import SendIcon from "@material-ui/icons/Send";
 import { makeStyles } from "@material-ui/core/styles";
-import { PythonShell } from "python-shell";
+import { sendTextToPython, createData } from "./utils";
 
 const useStyles = makeStyles(theme => ({
+  box: {
+    position: "sticky",
+    bottom: 0
+  },
   container: {
-    display: "flex",
-    flexWrap: "wrap"
+    bottom: 0,
+    backgroundColor: theme.palette.background.default,
+    maxWidth: "none"
   },
   textField: {
     marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: "70%"
-  },
-  dense: {
-    marginTop: theme.spacing(2)
-  },
-  menu: {
-    width: 200
+    marginRight: theme.spacing(1)
   }
 }));
 
-export const ChatInput = () => {
+export const ChatInput = props => {
   const classes = useStyles();
   const [text, settext] = useState(String);
-  // let pyshell = new PythonShell("./worker.py");
+  const [error, seterror] = useState(false);
 
   const submitText = event => {
     if (text) {
-      // pyshell.send(text);
+      sendTextToPython(text);
+      settext("");
     }
     event.preventDefault();
   };
@@ -39,28 +38,40 @@ export const ChatInput = () => {
   };
 
   return (
-    <Container direction="column" justify="space-around" alignitems="flex-end">
-      <form onSubmit={handleChange}>
-        <TextField
-          id="outlined-multiline-static"
-          label="InfraChat"
-          multiline
-          rows="2"
-          margin="normal"
-          variant="outlined"
-          className={classes.textField}
-          onChange={event => settext(event.target.value)}
-        />
-        <Button
-          size="large"
-          variant="contained"
-          color="secondary"
-          onClick={submitText}
-          endIcon={<SendTwoToneIcon />}
-        >
-          SEND
-        </Button>
-      </form>
-    </Container>
+    <Box className={classes.box}>
+      <Container
+        direction="column"
+        justify="space-around"
+        alignitems="flex-end"
+        className={classes.container}
+      >
+        <form onSubmit={submitText}>
+          <TextField
+            error={error}
+            color="secondary"
+            fullWidth
+            id="outlined-multiline-static"
+            label="Send Text"
+            multiline
+            rows="2"
+            margin="normal"
+            variant="outlined"
+            className={classes.textField}
+            onChange={handleChange}
+            value={text}
+            onKeyDown={event => {
+              if (event.key === "Enter" && !event.shiftKey) submitText(event);
+            }}
+            InputProps={{
+              endAdornment: (
+                <IconButton size="medium" onClick={submitText}>
+                  <SendIcon color="primary" />
+                </IconButton>
+              )
+            }}
+          />
+        </form>
+      </Container>
+    </Box>
   );
 };

@@ -1,13 +1,24 @@
 import sys
+import json
 import os
 
 
+def read_in_stdin():
+    return sys.stdin.readline()
+
+#! if sending json to frontend dont forget to flush in printing with flush=True, end=''
+
+
 def main():
-    if len(sys.argv) > 2:
-        print('Python: Got args {} and {} from React'.format(sys.argv[1], sys.argv[2]))
-    else:
-        print('Got no args from React')
-    print('The current working directory is {}'.format(os.getcwd()))
+    jsonFilePath = os.path.join(os.path.dirname(
+        __file__), '..', 'Log', 'chatLog.json')
+    data = read_in_stdin()
+    print(data, flush=True, end='')
+    with open(jsonFilePath, mode='w', encoding='utf-8') as f:
+        json.dump([], f)
+    # with open(jsonFilePath, 'r', encoding='utf-8') as jf:
+    #     # json.dump(data, jf, ensure_ascii=True)
+    #     jf.write(json.loads(data))
 
 
 if __name__ == '__main__':
