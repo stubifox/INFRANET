@@ -26,7 +26,7 @@ export const ChatInput = props => {
   const [text, settext] = useState(String);
   const [error, seterror] = useState(false);
 
-  const sender = ["max", ""];
+  const sender = ["max", "hans"];
   const selectSender = sender[Math.floor(Math.random() * sender.length)];
   const submitText = event => {
     if (text) {

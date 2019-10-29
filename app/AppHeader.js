@@ -1,8 +1,8 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppBar, Toolbar, Typography, IconButton } from "@material-ui/core";
-import Brightness4Icon from "@material-ui/icons/Brightness4";
-import Brightness4OutlinedIcon from "@material-ui/icons/Brightness4Outlined";
+import { AppBar, Toolbar, Typography } from "@material-ui/core";
+
+import { PopMenu } from "./PopMenu";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,16 +29,10 @@ export const AppHeader = props => {
           <Typography variant="h6" className={classes.title}>
             INFRACHAT
           </Typography>
-          <IconButton
-            size="medium"
-            onClick={() => setprefersDarkMode(!prefersDarkMode)}
-          >
-            {prefersDarkMode ? (
-              <Brightness4Icon />
-            ) : (
-              <Brightness4OutlinedIcon />
-            )}
-          </IconButton>
+          <PopMenu
+            prefersDarkMode={prefersDarkMode}
+            setprefersDarkMode={setprefersDarkMode}
+          />
         </Toolbar>
       </AppBar>
     </div>

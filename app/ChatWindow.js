@@ -19,8 +19,8 @@ export const ChatWindow = props => {
     scrollToBottom();
   }, [messages]);
 
-  const scrollToBottom = (behaviour = "auto") => {
-    bottomRef.current.scrollIntoView({ behaviour: behaviour });
+  const scrollToBottom = () => {
+    bottomRef.current.scrollIntoView({ behaviour: "smooth" });
   };
 
   const handleScroll = event => {
@@ -45,7 +45,7 @@ export const ChatWindow = props => {
               size="medium"
               aria-label="down"
               onClick={() => {
-                scrollToBottom("smooth");
+                scrollToBottom();
                 showscrollButton(false);
               }}
             >

@@ -13,6 +13,8 @@ import { AppHeader } from "./AppHeader";
 const App = () => {
   const [prefersDarkMode, setprefersDarkMode] = useState(false);
   const [messages, setmessages] = useState([]);
+  const [arduinoID, setarduinoID] = useState(String);
+  const [aliasName, setaliasName] = useState(String);
 
   const userTheme = createMuiTheme({
     palette: {
