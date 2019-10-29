@@ -12,6 +12,8 @@ import { AppHeader } from "./AppHeader";
 
 const App = () => {
   const [prefersDarkMode, setprefersDarkMode] = useState(false);
+  const [messages, setmessages] = useState([]);
+
   const userTheme = createMuiTheme({
     palette: {
       type: prefersDarkMode ? "dark" : "light",
@@ -35,8 +37,16 @@ const App = () => {
         }}
         bgcolor={userTheme.palette.background.default}
       >
-        <ChatWindow theme={userTheme} />
-        <ChatInput theme={userTheme} />
+        <ChatWindow
+          theme={userTheme}
+          messages={messages}
+          setmessages={setmessages}
+        />
+        <ChatInput
+          theme={userTheme}
+          messages={messages}
+          setmessages={setmessages}
+        />
       </Box>
     </ThemeProvider>
   );

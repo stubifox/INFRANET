@@ -1,3 +1,10 @@
 {
-    "python.pythonPath": "venv\\Scripts\\python.exe",
+  "python.pythonPath": "venv/bin/python",
+  "sqltools.connections": [
+    {
+      "database": "./Log/chatLog.db",
+      "dialect": "SQLite",
+      "name": "python sqlite3 connect."
+    }
+  ]
 }

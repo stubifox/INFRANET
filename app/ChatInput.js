@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { TextField, Container, IconButton, Box } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
 import { makeStyles } from "@material-ui/core/styles";
-import { sendTextToPython, createData } from "./utils";
+import { pyConnections } from "./utils";
 
 const useStyles = makeStyles(theme => ({
   box: {
@@ -21,13 +21,15 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const ChatInput = props => {
+  const { messages, setmessages } = props;
   const classes = useStyles();
   const [text, settext] = useState(String);
   const [error, seterror] = useState(false);
 
   const submitText = event => {
     if (text) {
-      sendTextToPython(text);
+      pyConnections.insertIntoDb(text, "max");
+      pyConnections.getFromDb("", setmessages);
       settext("");
     }
     event.preventDefault();
