@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Menu,
   MenuItem,
@@ -11,7 +11,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 export const PopMenu = props => {
   const { prefersDarkMode, setprefersDarkMode } = props;
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -22,7 +22,7 @@ export const PopMenu = props => {
   };
 
   return (
-    <div>
+    <React.Fragment>
       <Tooltip title="More" placement="left">
         <IconButton
           aria-controls="simple-menu"
@@ -47,6 +47,6 @@ export const PopMenu = props => {
           />
         </MenuItem>
       </Menu>
-    </div>
+    </React.Fragment>
   );
 };

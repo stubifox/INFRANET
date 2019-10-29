@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Grid, Fab } from "@material-ui/core";
+import { Box, Grid, Fab, Tooltip } from "@material-ui/core";
 import { pyConnections } from "./utils.js";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ChatMessages } from "./ChatMessages";
@@ -41,16 +41,18 @@ export const ChatWindow = props => {
           style={{ position: "fixed", bottom: "20vh" }}
         >
           {scrollButton && (
-            <Fab
-              size="medium"
-              aria-label="down"
-              onClick={() => {
-                scrollToBottom();
-                showscrollButton(false);
-              }}
-            >
-              <ExpandMoreIcon />
-            </Fab>
+            <Tooltip title="Scroll Down" placement="top">
+              <Fab
+                size="medium"
+                aria-label="down"
+                onClick={() => {
+                  scrollToBottom();
+                  showscrollButton(false);
+                }}
+              >
+                <ExpandMoreIcon />
+              </Fab>
+            </Tooltip>
           )}
         </Grid>
         <Box ref={bottomRef}></Box>
