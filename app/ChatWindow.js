@@ -1,36 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Box, Grid, Paper, Typography } from "@material-ui/core";
-import chatLog from "../Log/chatLog.json";
-import { makeStyles } from "@material-ui/core/styles";
-import { getFromDb, pyConnections } from "./utils.js";
-
-const useStyles = makeStyles(theme => ({
-  typo: {
-    wordBreak: "break-word"
-  },
-  leftMessage: {
-    padding: theme.spacing(1),
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2),
-    maxWidth: "40%",
-    backgroundColor: theme.palette.primary.light
-  },
-  rightMessage: {
-    padding: theme.spacing(1),
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2),
-    maxWidth: "40%",
-    backgroundColor: theme.palette.secondary.light
-  }
-}));
+import { Box, Grid, Fab } from "@material-ui/core";
+import { pyConnections } from "./utils.js";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { ChatMessages } from "./ChatMessages";
 
 export const ChatWindow = props => {
   const { messages, setmessages } = props;
 
-  const classes = useStyles();
   const bottomRef = React.createRef();
+  const [scrollButton, showscrollButton] = useState(false);
 
   useEffect(() => {
     pyConnections.getFromDb("", setmessages);
@@ -41,38 +19,42 @@ export const ChatWindow = props => {
     scrollToBottom();
   }, [messages]);
 
-  const scrollToBottom = () => {
-    bottomRef.current.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behaviour = "auto") => {
+    bottomRef.current.scrollIntoView({ behaviour: behaviour });
+  };
+
+  const handleScroll = event => {
+    if (event.nativeEvent.wheelDelta > 0) {
+      showscrollButton(true);
+    }
   };
 
   return (
-    <Box>
-      {messages &&
-        messages.map(log => (
-          <Grid
-            key={log.id}
-            spacing={0}
-            container
-            className={classes.box}
-            direction="column"
-            justify="space-evenly"
-            alignItems={log.sender === "max" ? "flex-end" : "flex-start"}
-          >
-            <Paper
-              className={
-                log.sender === "max"
-                  ? classes.rightMessage
-                  : classes.leftMessage
-              }
+    <Box style={{ overflow: "hidden" }} onWheel={e => handleScroll(e)}>
+      <Grid container direction="column" alignItems="center" justify="flex-end">
+        <ChatMessages messages={messages} />
+        <Grid
+          container
+          direction="column"
+          justify="flex-end"
+          alignItems="center"
+          style={{ position: "fixed", bottom: "20vh" }}
+        >
+          {scrollButton && (
+            <Fab
+              size="medium"
+              aria-label="down"
+              onClick={() => {
+                scrollToBottom("smooth");
+                showscrollButton(false);
+              }}
             >
-              <Grid container direction="row" justify="space-between">
-                <Typography className={classes.typo}>{log.message}</Typography>
-                <Typography align="right">{log.time}</Typography>
-              </Grid>
-            </Paper>
-          </Grid>
-        ))}
-      <Box ref={bottomRef} />
+              <ExpandMoreIcon />
+            </Fab>
+          )}
+        </Grid>
+        <Box ref={bottomRef}></Box>
+      </Grid>
     </Box>
   );
 };

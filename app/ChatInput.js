@@ -26,9 +26,11 @@ export const ChatInput = props => {
   const [text, settext] = useState(String);
   const [error, seterror] = useState(false);
 
+  const sender = ["max", ""];
+  const selectSender = sender[Math.floor(Math.random() * sender.length)];
   const submitText = event => {
     if (text) {
-      pyConnections.insertIntoDb(text, "max");
+      pyConnections.insertIntoDb(text, selectSender);
       pyConnections.getFromDb("", setmessages);
       settext("");
     }

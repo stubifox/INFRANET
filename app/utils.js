@@ -41,7 +41,7 @@ export const pyConnections = {
  * @param {['json', 'text']} mode specifies the mode the data is send to Python
  */
 const createPythonCon = (fileName, mode = "text") => {
-  return new PythonShell(join(__dirname, `${fileName}.py`), {
+  return new PythonShell(join(__dirname, "communicate", `${fileName}.py`), {
     mode: mode
   });
 };

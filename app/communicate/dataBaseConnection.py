@@ -4,7 +4,8 @@ import sys
 import os
 import json
 
-path = os.path.join(os.path.dirname(__file__), '..', 'Log', 'chatLog.db')
+path = os.path.join(os.path.dirname(__file__), '..',
+                    '..',  'Log', 'chatLog.db')
 
 
 def connectDb():
