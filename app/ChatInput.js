@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const ChatInput = props => {
-  const { messages, setmessages } = props;
+  const { messages, setmessages, setexp } = props;
   const classes = useStyles();
   const [text, settext] = useState(String);
   const [error, seterror] = useState(false);
@@ -31,7 +31,8 @@ export const ChatInput = props => {
   const submitText = event => {
     if (text) {
       pyConnections.insertIntoDb(text, selectSender);
-      pyConnections.getFromDb("", setmessages);
+      pyConnections.getFromDb("entry", setmessages, messages);
+      setexp("entry");
       settext("");
     }
     event.preventDefault();

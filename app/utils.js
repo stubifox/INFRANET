@@ -2,10 +2,10 @@ import { PythonShell } from "python-shell";
 import { join } from "path";
 
 export const pyConnections = {
-  insertIntoDb: (message, sender) => {
+  insertIntoDb: async (message, sender) => {
     const pyShell = createPythonCon("dataBaseConnection", "json");
     pyShell.send(createData(message, sender));
-    pyShell.on("message", message => {
+    await pyShell.on("message", message => {
       console.log(message);
     });
 
@@ -16,14 +16,26 @@ export const pyConnections = {
       console.log("The exit signal was: " + signal);
       console.log("finished");
     });
+    return;
   },
 
-  getFromDb: (exp, setstateFunc) => {
+  getFromDb: async (exp, setstateFunc, state) => {
     const pyShell = createPythonCon("getFromDb", "json");
-    pyShell.send({ test: 1 });
-    console.log(exp);
-    pyShell.on("message", response => {
-      setstateFunc(response);
+    if (exp === "loadMore") {
+      pyShell.send({ load: exp, id: state[0].id });
+    } else {
+      pyShell.send({ load: exp });
+    }
+    await pyShell.on("message", response => {
+      if (exp === "initial") {
+        setstateFunc(response);
+      } else if (exp === "entry") {
+        setstateFunc([...state, response[0]]);
+      } else if (exp === "loadMore") {
+        setstateFunc([...response, ...state]);
+      } else {
+        console.error("queue is not defined!!" + exp);
+      }
     });
 
     //   end the input stream and allow the process to exit
@@ -33,6 +45,7 @@ export const pyConnections = {
       console.log("The exit signal was: " + signal);
       console.log("finished");
     });
+    return;
   }
 };
 /**
@@ -40,7 +53,7 @@ export const pyConnections = {
  * @param {String} fileName Python file in ./app folder!! without .py!!
  * @param {['json', 'text']} mode specifies the mode the data is send to Python
  */
-const createPythonCon = (fileName, mode = "text") => {
+const createPythonCon = (fileName, mode) => {
   return new PythonShell(join(__dirname, "communicate", `${fileName}.py`), {
     mode: mode
   });

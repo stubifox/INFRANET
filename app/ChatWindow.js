@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Box, Grid, Fab, Tooltip } from "@material-ui/core";
+import { Box, Grid, Fab, Tooltip, IconButton } from "@material-ui/core";
 import { pyConnections } from "./utils.js";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ChatMessages } from "./ChatMessages";
+import AutorenewIcon from "@material-ui/icons/Autorenew";
 
 export const ChatWindow = props => {
-  const { messages, setmessages } = props;
-
+  const { messages, setmessages, exp, setexp } = props;
   const bottomRef = React.createRef();
   const [scrollButton, showscrollButton] = useState(false);
 
   useEffect(() => {
-    pyConnections.getFromDb("", setmessages);
-    scrollToBottom();
+    pyConnections.getFromDb("initial", setmessages, messages);
+    setexp("initial");
+    if (exp !== "loadMore") {
+      scrollToBottom();
+    }
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    if (exp !== "loadMore") {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const scrollToBottom = () => {
@@ -28,10 +33,19 @@ export const ChatWindow = props => {
       showscrollButton(true);
     }
   };
+  const loadOlderMessages = () => {
+    pyConnections.getFromDb("loadMore", setmessages, messages);
+    setexp("loadMore");
+  };
 
   return (
     <Box style={{ overflow: "hidden" }} onWheel={e => handleScroll(e)}>
       <Grid container direction="column" alignItems="center" justify="flex-end">
+        <Tooltip title="Load Older Messages" position="top">
+          <IconButton onClick={loadOlderMessages} color="primary">
+            <AutorenewIcon />
+          </IconButton>
+        </Tooltip>
         <ChatMessages messages={messages} />
         <Grid
           container

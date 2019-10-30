@@ -41,7 +41,6 @@ export const ChatMessages = props => {
   let renderDate = String;
   const checkRenderDate = date => {
     if (date === renderDate) {
-      console.log(date);
       return false;
     }
     if (date !== renderDate) {

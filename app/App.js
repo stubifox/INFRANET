@@ -15,6 +15,7 @@ const App = () => {
   const [messages, setmessages] = useState([]);
   const [arduinoID, setarduinoID] = useState(String);
   const [aliasName, setaliasName] = useState(String);
+  const [exp, setexp] = useState(String);
 
   const userTheme = createMuiTheme({
     palette: {
@@ -43,11 +44,14 @@ const App = () => {
           theme={userTheme}
           messages={messages}
           setmessages={setmessages}
+          exp={exp}
+          setexp={setexp}
         />
         <ChatInput
           theme={userTheme}
           messages={messages}
           setmessages={setmessages}
+          setexp={setexp}
         />
       </Box>
     </ThemeProvider>
