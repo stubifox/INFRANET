@@ -2,10 +2,14 @@ import { PythonShell } from "python-shell";
 import { join } from "path";
 
 export const pyConnections = {
-  insertIntoDb: async (message, sender) => {
+  insertIntoDb: (message, sender, exp = "") => {
     const pyShell = createPythonCon("dataBaseConnection", "json");
-    pyShell.send(createData(message, sender));
-    await pyShell.on("message", message => {
+    if (exp === "initial") {
+      pyShell.send(createData("", "", exp));
+    } else {
+      pyShell.send(createData(message, sender, exp));
+    }
+    pyShell.on("message", message => {
       console.log(message);
     });
 
@@ -59,9 +63,10 @@ const createPythonCon = (fileName, mode) => {
   });
 };
 
-const createData = (message, sender) => {
+const createData = (message, sender, exp) => {
   return {
     message: message,
-    sender: sender
+    sender: sender,
+    load: exp
   };
 };

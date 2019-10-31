@@ -32,6 +32,7 @@ def createDataBase():
     ) '''
 
     dbcursor.execute(sql)
+    con.commit()
     con.close()
 
 
@@ -48,12 +49,14 @@ def insertToDb(sender, message,):
 
 
 def main():
-    if not os.path.exists(path):
-        createDataBase()
     data = read_in_stdin()
-    #! data muss immer von der Form sein: {"message": "...", "sender": "..."}!, wird aber im frontend behandelt
-    message, sender = data['message'], data['sender']
-    insertToDb(sender=sender, message=message)
+    if data['load'] == 'initial':
+        createDataBase()
+        return
+    else:
+        #! data muss immer von der Form sein: {"message": "...", "sender": "..."}!, wird aber im frontend behandelt
+        message, sender = data['message'], data['sender']
+        insertToDb(sender=sender, message=message)
 
 
 if __name__ == '__main__':

@@ -11,6 +11,7 @@ export const ChatWindow = props => {
   const [scrollButton, showscrollButton] = useState(false);
 
   useEffect(() => {
+    pyConnections.insertIntoDb("", "", "initial");
     pyConnections.getFromDb("initial", setmessages, messages);
     setexp("initial");
     if (exp !== "loadMore") {
