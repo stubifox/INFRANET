@@ -42,11 +42,13 @@ export const ChatWindow = props => {
   return (
     <Box style={{ overflow: "hidden" }} onWheel={handleScroll}>
       <Grid container direction="column" alignItems="center" justify="flex-end">
-        <Tooltip title="Load Older Messages" placement="left">
-          <IconButton onClick={loadOlderMessages} color="primary">
-            <AutorenewIcon />
-          </IconButton>
-        </Tooltip>
+        {messages.length && (
+          <Tooltip title="Load Older Messages" placement="left">
+            <IconButton onClick={loadOlderMessages} color="primary">
+              <AutorenewIcon />
+            </IconButton>
+          </Tooltip>
+        )}
         <ChatMessages messages={messages} />
         <Grid
           container

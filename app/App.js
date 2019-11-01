@@ -1,7 +1,7 @@
 "use babel";
 
 import React, { useState, useEffect } from "react";
-import { Box, IconButton } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import { ThemeProvider } from "@material-ui/styles";
 import { ChatInput } from "./ChatInput";
 import { ChatWindow } from "./ChatWindow";
@@ -30,16 +30,14 @@ const App = () => {
 
   return (
     <ThemeProvider theme={userTheme}>
-      <AppHeader
-        prefersDarkMode={prefersDarkMode}
-        setprefersDarkMode={setprefersDarkMode}
-      />
       <Box
-        style={{
-          minHeight: window.innerHeight
-        }}
+        style={{ minHeight: window.innerHeight }}
         bgcolor={userTheme.palette.background.default}
       >
+        <AppHeader
+          prefersDarkMode={prefersDarkMode}
+          setprefersDarkMode={setprefersDarkMode}
+        />
         <ChatWindow
           theme={userTheme}
           messages={messages}
@@ -47,12 +45,16 @@ const App = () => {
           exp={exp}
           setexp={setexp}
         />
-        <ChatInput
-          theme={userTheme}
-          messages={messages}
-          setmessages={setmessages}
-          setexp={setexp}
-        />
+        <Box
+          style={{ position: "fixed", bottom: 0, minWidth: window.innerWidth }}
+        >
+          <ChatInput
+            theme={userTheme}
+            messages={messages}
+            setmessages={setmessages}
+            setexp={setexp}
+          />
+        </Box>
       </Box>
     </ThemeProvider>
   );

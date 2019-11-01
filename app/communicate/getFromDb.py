@@ -72,7 +72,7 @@ def main():
         getInsertedValue()
     elif exp == 'loadMore':
         startID = load['id']
-        loadMoreEntrys(startID)
+        loadMoreEntrys(startID=startID)
 
 
 if __name__ == '__main__':
