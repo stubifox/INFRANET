@@ -26,7 +26,7 @@ export const ChatWindow = props => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    bottomRef.current.scrollIntoView({ behaviour: "smooth" });
+    bottomRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleScroll = event => {
@@ -40,7 +40,7 @@ export const ChatWindow = props => {
   };
 
   return (
-    <Box style={{ overflow: "hidden" }} onWheel={e => handleScroll(e)}>
+    <Box style={{ overflow: "hidden" }} onWheel={handleScroll}>
       <Grid container direction="column" alignItems="center" justify="flex-end">
         <Tooltip title="Load Older Messages" placement="left">
           <IconButton onClick={loadOlderMessages} color="primary">
@@ -53,7 +53,7 @@ export const ChatWindow = props => {
           direction="column"
           justify="flex-end"
           alignItems="center"
-          style={{ position: "fixed", bottom: "20vh" }}
+          style={{ position: "fixed", bottom: window.innerHeight * 0.2 }}
         >
           {scrollButton && (
             <Tooltip title="Scroll Down" placement="top">

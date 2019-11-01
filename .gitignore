@@ -3,3 +3,4 @@ venv
 .dist
 .vscode
 __pycache__
+*Session.sql

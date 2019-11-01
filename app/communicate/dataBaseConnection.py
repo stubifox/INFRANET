@@ -41,12 +41,10 @@ def insertToDb(sender, message,):
     dbcursor = con.cursor()
     sql = '''INSERT INTO message_log (sender, time, date, message)
         VALUES(?, time('now', 'localtime'), date('now'), ?)'''
-
     dbcursor.execute(sql, (sender, message))
-
     con.commit()
     con.close()
-
+    
 
 def main():
     data = read_in_stdin()

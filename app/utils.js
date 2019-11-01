@@ -16,9 +16,9 @@ export const pyConnections = {
     //   end the input stream and allow the process to exit
     pyShell.end((err, code, signal) => {
       if (err) throw err;
-      console.log("The exit code was: " + code);
-      console.log("The exit signal was: " + signal);
-      console.log("finished");
+      console.log(
+        `Python File dataBaseConnection.py ended with code: ${code} and signal: ${signal}`
+      );
     });
     return;
   },
@@ -45,9 +45,9 @@ export const pyConnections = {
     //   end the input stream and allow the process to exit
     pyShell.end((err, code, signal) => {
       if (err) throw err;
-      console.log("The exit code was: " + code);
-      console.log("The exit signal was: " + signal);
-      console.log("finished");
+      console.log(
+        `Python File getFromDb.py ended with code: ${code} and signal: ${signal}`
+      );
     });
     return;
   }
