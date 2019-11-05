@@ -33,11 +33,8 @@ export const pyConnections = {
     await pyShell.on("message", response => {
       if (exp === "initial") {
         setstateFunc(response);
-        console.log(response);
       } else if (exp === "entry") {
         setstateFunc([...state, response[0]]);
-        console.log([...state, ...response]);
-        console.log(...response);
       } else if (exp === "loadMore") {
         setstateFunc([...response, ...state]);
       } else {

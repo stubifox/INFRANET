@@ -51,20 +51,12 @@ const App = () => {
           exp={exp}
           setexp={setexp}
         />
-        {/* <Box
-          style={{
-            position: "fixed",
-            bottom: 0,
-            minWidth: window.outerWidth
-          }}
-        > */}
         <ChatInput
           theme={userTheme}
           messages={messages}
           setmessages={setmessages}
           setexp={setexp}
         />
-        {/* </Box> */}
       </Grid>
     </ThemeProvider>
   );

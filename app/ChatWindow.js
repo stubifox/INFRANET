@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, Grid, Fab, Tooltip, IconButton } from "@material-ui/core";
 import { pyConnections } from "./utils.js";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -7,7 +7,7 @@ import AutorenewIcon from "@material-ui/icons/Autorenew";
 
 export const ChatWindow = props => {
   const { messages, setmessages, exp, setexp } = props;
-  const bottomRef = createRef();
+  const bottomRef = useRef();
   const [scrollButton, showscrollButton] = useState(false);
 
   useEffect(() => {
