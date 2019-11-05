@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Grid, Paper, Typography, Box, Container } from "@material-ui/core";
+import React from "react";
+import { Grid, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
@@ -39,6 +39,7 @@ const useStyles = makeStyles(theme => ({
 export const ChatMessages = props => {
   const classes = useStyles();
   let renderDate = String;
+  let lastID = Number;
   const checkRenderDate = date => {
     if (date === renderDate) {
       return false;
@@ -50,7 +51,9 @@ export const ChatMessages = props => {
   };
 
   const { messages } = props;
-
+  if (messages.length) {
+    lastID = messages[messages.length - 1].id;
+  }
   return (
     <React.Fragment>
       {messages &&

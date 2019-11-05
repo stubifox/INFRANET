@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createRef } from "react";
 import { Box, Grid, Fab, Tooltip, IconButton } from "@material-ui/core";
 import { pyConnections } from "./utils.js";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -7,7 +7,7 @@ import AutorenewIcon from "@material-ui/icons/Autorenew";
 
 export const ChatWindow = props => {
   const { messages, setmessages, exp, setexp } = props;
-  const bottomRef = React.createRef();
+  const bottomRef = createRef();
   const [scrollButton, showscrollButton] = useState(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export const ChatWindow = props => {
   return (
     <Box style={{ overflow: "hidden" }} onWheel={handleScroll}>
       <Grid container direction="column" alignItems="center" justify="flex-end">
-        {messages.length && (
+        {!!messages.length && (
           <Tooltip title="Load Older Messages" placement="left">
             <IconButton onClick={loadOlderMessages} color="primary">
               <AutorenewIcon />
@@ -72,8 +72,8 @@ export const ChatWindow = props => {
             </Tooltip>
           )}
         </Grid>
-        <Box ref={bottomRef}></Box>
       </Grid>
+      <Box ref={bottomRef} />
     </Box>
   );
 };

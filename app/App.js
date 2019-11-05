@@ -30,9 +30,15 @@ const App = () => {
 
   return (
     <ThemeProvider theme={userTheme}>
-      <Box
-        style={{ minHeight: window.innerHeight }}
-        bgcolor={userTheme.palette.background.default}
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        style={{
+          minHeight: window.innerHeight,
+          background: userTheme.palette.background.default
+        }}
       >
         <AppHeader
           prefersDarkMode={prefersDarkMode}
@@ -45,17 +51,21 @@ const App = () => {
           exp={exp}
           setexp={setexp}
         />
-        <Box
-          style={{ position: "fixed", bottom: 0, minWidth: window.innerWidth }}
-        >
-          <ChatInput
-            theme={userTheme}
-            messages={messages}
-            setmessages={setmessages}
-            setexp={setexp}
-          />
-        </Box>
-      </Box>
+        {/* <Box
+          style={{
+            position: "fixed",
+            bottom: 0,
+            minWidth: window.outerWidth
+          }}
+        > */}
+        <ChatInput
+          theme={userTheme}
+          messages={messages}
+          setmessages={setmessages}
+          setexp={setexp}
+        />
+        {/* </Box> */}
+      </Grid>
     </ThemeProvider>
   );
 };
