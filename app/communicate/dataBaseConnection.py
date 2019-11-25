@@ -3,6 +3,7 @@ import sqlite3
 import sys
 import os
 import json
+import decryptionTest
 
 path = os.path.join(os.path.dirname(__file__), '..',
                     '..',  'Log', 'chatLog.db')
@@ -55,6 +56,9 @@ def main():
         #! data muss immer von der Form sein: {"message": "...", "sender": "..."}!, wird aber im frontend behandelt
         message, sender = data['message'], data['sender']
         insertToDb(sender=sender, message=message)
+        print(json.dumps(data))
+        decryptionTest.encryptAndDecryptMessage(json.dumps(data))
+        #jetzt sende den encrypted message
 
 
 if __name__ == '__main__':
