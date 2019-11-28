@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+/**
+ * author: Max Stubenbord
+ */
+
+import React, { useState, useEffect } from "react";
 import {
   Menu,
   MenuItem,
@@ -10,7 +14,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 export const PopMenu = props => {
-  const { prefersDarkMode, setprefersDarkMode } = props;
+  const { userDefaults, setuserDefaults } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = event => {
@@ -21,9 +25,16 @@ export const PopMenu = props => {
     setAnchorEl(null);
   };
 
+  const handleThemeSwitch = () => {
+    setuserDefaults({
+      sender: userDefaults.sender,
+      userTheme: !userDefaults.userTheme
+    });
+  };
+
   return (
     <React.Fragment>
-      <Tooltip title="More" placement="left">
+      <Tooltip title="More" placement="bottom">
         <IconButton
           aria-controls="simple-menu"
           aria-haspopup="true"
@@ -40,11 +51,8 @@ export const PopMenu = props => {
         onClose={handleClose}
       >
         <MenuItem>
-          <Typography variant="subtitle1">Enable Dark Mode</Typography>
-          <Switch
-            color="secondary"
-            onClick={() => setprefersDarkMode(!prefersDarkMode)}
-          />
+          <Typography variant="subtitle1">Switch Theme</Typography>
+          <Switch color="secondary" onClick={handleThemeSwitch} />
         </MenuItem>
       </Menu>
     </React.Fragment>

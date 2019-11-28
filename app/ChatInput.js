@@ -1,3 +1,7 @@
+/**
+ * author: Max Stubenbord
+ */
+
 import React, { useState } from "react";
 import { TextField, Container, IconButton, Box } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
@@ -21,25 +25,44 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const ChatInput = props => {
-  const { messages, setmessages, setexp } = props;
+  const {
+    messages,
+    setmessages,
+    setexp,
+    arduinoConnectedToSerial,
+    handleShowSnackBar,
+    connectionEstablished,
+    sender
+  } = props;
   const classes = useStyles();
+
   const [text, settext] = useState(String);
   const [error, seterror] = useState(false);
-
-  const sender = ["max", "hans"];
-  const selectSender = sender[Math.floor(Math.random() * sender.length)];
   const submitText = event => {
-    if (text) {
-      pyConnections.insertIntoDb(text, selectSender);
+    if (arduinoConnectedToSerial && connectionEstablished && text) {
+      seterror(false);
+      pyConnections.insertIntoDb(text, sender);
       pyConnections.getFromDb("entry", setmessages, messages);
+      handleShowSnackBar("message send!", "success");
       setexp("entry");
       settext("");
+    } else {
+      handleErrors();
     }
     event.preventDefault();
   };
 
   const handleChange = event => {
     settext(event.target.value);
+  };
+  const handleErrors = () => {
+    seterror(true);
+    if (!arduinoConnectedToSerial) {
+      handleShowSnackBar("No Device connected to USB!", "error");
+    }
+    if (arduinoConnectedToSerial && !connectionEstablished) {
+      handleShowSnackBar("Not connected to Chatpartner!", "error");
+    }
   };
 
   return (

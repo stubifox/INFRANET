@@ -6,14 +6,30 @@ import { ChatMessages } from "./ChatMessages";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 
 export const ChatWindow = props => {
-  const { messages, setmessages, exp, setexp } = props;
+  const {
+    messages,
+    setmessages,
+    exp,
+    setexp,
+    arduinoConnectedToSerial,
+    sender
+  } = props;
   const bottomRef = useRef();
   const [scrollButton, showscrollButton] = useState(false);
 
+  /**
+   * on App load:
+   * - calling function for checking if a DB is present.
+   * -  getting stored Messages from DB if a Device is connected to the Serial Bus.
+   * - scrolling to Button of Messages
+   *
+   */
   useEffect(() => {
-    pyConnections.insertIntoDb("", "", "initial");
-    pyConnections.getFromDb("initial", setmessages, messages);
-    setexp("initial");
+    if (!arduinoConnectedToSerial) {
+      pyConnections.insertIntoDb("", "", "initial");
+      pyConnections.getFromDb("initial", setmessages, messages);
+      setexp("initial");
+    }
     if (exp !== "loadMore") {
       scrollToBottom();
     }
@@ -29,11 +45,16 @@ export const ChatWindow = props => {
     bottomRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
+  /**
+   *
+   * @param {'event'} event n MouseWheelScrollUp
+   */
   const handleScroll = event => {
     if (event.nativeEvent.wheelDelta > 0) {
       showscrollButton(true);
     }
   };
+
   const loadOlderMessages = () => {
     pyConnections.getFromDb("loadMore", setmessages, messages);
     setexp("loadMore");
@@ -49,7 +70,7 @@ export const ChatWindow = props => {
             </IconButton>
           </Tooltip>
         )}
-        <ChatMessages messages={messages} />
+        <ChatMessages messages={messages} sender={sender} />
         <Grid
           container
           direction="column"

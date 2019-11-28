@@ -1,3 +1,6 @@
+/**
+ * author: Max Stubenbord
+ */
 "use babel";
 
 import React, { useState, useEffect } from "react";
@@ -7,29 +10,98 @@ import { ChatInput } from "./ChatInput";
 import { ChatWindow } from "./ChatWindow";
 import { createMuiTheme } from "@material-ui/core/styles";
 import { purple } from "@material-ui/core/colors";
-
 import { AppHeader } from "./AppHeader";
+import { CustomizedSnackbar } from "./CustomSnackBar";
+import { pyConnections } from "./utils";
 
 const App = () => {
-  const [prefersDarkMode, setprefersDarkMode] = useState(false);
+  /**
+   * STATE DECLARATIONS
+   */
   const [messages, setmessages] = useState([]);
-  const [arduinoID, setarduinoID] = useState(String);
-  const [aliasName, setaliasName] = useState(String);
+  const [arduinoConnectedToSerial, setarduinoConnectedToSerial] = useState(
+    false
+  );
+  const [connectedChatPartner, setconnectedChatPartner] = useState(String);
+  const [connectionEstablished, setconnectionEstablished] = useState(false);
   const [exp, setexp] = useState(String);
+  const defaultStateSnackBar = {
+    display: false,
+    message: String,
+    variant: String
+  };
+  const [userDefaults, setuserDefaults] = useState({
+    sender: String,
+    userTheme: true
+  });
+  const [displaySnackBar, setdisplaySnackBar] = useState(defaultStateSnackBar);
+  /**
+   * END OF STATE DECLARATIONS
+   */
+  /**
+   *
+   * @param {string} message message to display in the Snackbar
+   * @param {["error", "info", "warning", "success"]} variant styling of SnackBar
+   * @param {number} timeout optional timeout
+   */
+  const handleShowSnackBar = (message, variant, timeout = 4000) => {
+    setdisplaySnackBar({ display: true, message: message, variant: variant });
+    setTimeout(() => setdisplaySnackBar(defaultStateSnackBar), timeout);
+  };
 
   const userTheme = createMuiTheme({
     palette: {
-      type: prefersDarkMode ? "dark" : "light",
+      type: userDefaults.userTheme ? "dark" : "light",
       primary: { main: purple[500] },
       secondary: { main: "#11cb5f" },
       background: {
-        default: prefersDarkMode ? "#121212" : "#ffff"
+        default: userDefaults.userTheme ? "#121212" : "#fff"
       }
     }
   });
 
+  /**
+   * on User Theme Change: insert new Preference to DB
+   */
+  useEffect(() => {
+    pyConnections.userDefaultsHandler(
+      userDefaults,
+      setuserDefaults,
+      "updateTheme"
+    );
+  }, [userDefaults.userTheme]);
+
+  /**
+   * on initial App load look if user has any Defaults declared, look up uuid(sender)
+   */
+  useEffect(() => {
+    pyConnections.userDefaultsHandler(userDefaults, setuserDefaults, "initial");
+  }, []);
+
+  /**
+   * display SnackBars when connection to either Device on USB is established
+   * or connection to Chat Partner is established
+   */
+  useEffect(() => {
+    arduinoConnectedToSerial
+      ? handleShowSnackBar("Device connected to USB!", "success")
+      : handleShowSnackBar("No device connected to USB!", "error");
+
+    arduinoConnectedToSerial &&
+      (connectionEstablished
+        ? handleShowSnackBar("Connected to Chatpartner", "success")
+        : handleShowSnackBar("Not connected to Chatpartner!", "warning"));
+  }, [arduinoConnectedToSerial, connectionEstablished]);
+
   return (
     <ThemeProvider theme={userTheme}>
+      {displaySnackBar.display && (
+        <CustomizedSnackbar
+          message={displaySnackBar.message}
+          variant={displaySnackBar.variant}
+        />
+      )}
+
       <Grid
         container
         direction="column"
@@ -41,21 +113,27 @@ const App = () => {
         }}
       >
         <AppHeader
-          prefersDarkMode={prefersDarkMode}
-          setprefersDarkMode={setprefersDarkMode}
+          arduinoConnectedToSerial={arduinoConnectedToSerial}
+          connectionEstablished={connectionEstablished}
+          userDefaults={userDefaults}
+          setuserDefaults={setuserDefaults}
         />
         <ChatWindow
-          theme={userTheme}
+          arduinoConnectedToSerial={arduinoConnectedToSerial}
           messages={messages}
           setmessages={setmessages}
           exp={exp}
           setexp={setexp}
+          sender={userDefaults.sender}
         />
         <ChatInput
-          theme={userTheme}
+          sender={userDefaults.sender}
+          arduinoConnectedToSerial={arduinoConnectedToSerial}
+          connectionEstablished={connectionEstablished}
           messages={messages}
           setmessages={setmessages}
           setexp={setexp}
+          handleShowSnackBar={handleShowSnackBar}
         />
       </Grid>
     </ThemeProvider>

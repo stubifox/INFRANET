@@ -1,8 +1,12 @@
 # dataBaseConncetion.py
+# author: Max Stubenbord
+
 import sqlite3
 import sys
 import os
 import json
+import getFromDb
+
 
 path = os.path.join(os.path.dirname(__file__), '..',
                     '..',  'Log', 'chatLog.db')
@@ -18,6 +22,18 @@ def connectDb():
 
 def read_in_stdin():
     return json.loads(sys.stdin.readline())
+
+
+def createSettingsTable():
+    con = connectDb()
+    dbcursor = con.cursor()
+    sql = '''CREATE TABLE IF NOT EXISTS settings(
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    ) '''
+    dbcursor.execute(sql)
+    con.commit()
+    con.close()
 
 
 def createDataBase():
@@ -44,12 +60,13 @@ def insertToDb(sender, message,):
     dbcursor.execute(sql, (sender, message))
     con.commit()
     con.close()
-    
+
 
 def main():
     data = read_in_stdin()
     if data['load'] == 'initial':
         createDataBase()
+        createSettingsTable()
         return
     else:
         #! data muss immer von der Form sein: {"message": "...", "sender": "..."}!, wird aber im frontend behandelt

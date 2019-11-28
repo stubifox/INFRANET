@@ -1,3 +1,6 @@
+# getFromDb.py
+# author: Max Stubenbord
+
 import sqlite3
 import sys
 import os
@@ -42,6 +45,7 @@ def getInsertedValue():
     cursor.execute(sql)
     lastEntry = cursor.fetchall()
     print(json.dumps(lastEntry))
+    con.close()
 
 
 def loadMoreEntrys(startID):
@@ -60,6 +64,7 @@ def loadMoreEntrys(startID):
     cursor.execute(sql, (startID,))
     newEntrys = cursor.fetchall()
     print(json.dumps(newEntrys))
+    con.close()
 
 
 def main():

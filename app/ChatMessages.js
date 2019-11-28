@@ -1,3 +1,7 @@
+/**
+ * author: Max Stubenbord
+ */
+
 import React from "react";
 import { Grid, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -49,7 +53,7 @@ export const ChatMessages = props => {
     }
   };
 
-  const { messages } = props;
+  const { messages, sender } = props;
 
   return (
     <React.Fragment>
@@ -66,11 +70,11 @@ export const ChatMessages = props => {
               container
               direction="column"
               justify="space-evenly"
-              alignItems={log.sender === "max" ? "flex-end" : "flex-start"}
+              alignItems={log.sender === sender ? "flex-end" : "flex-start"}
             >
               <Paper
                 className={
-                  log.sender === "max"
+                  log.sender === sender
                     ? classes.rightMessage
                     : classes.leftMessage
                 }

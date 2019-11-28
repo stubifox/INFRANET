@@ -1,6 +1,14 @@
+/**
+ * author: Max Stubenbord
+ */
+
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Toolbar, Typography, Tooltip } from "@material-ui/core";
+import PhonelinkEraseIcon from "@material-ui/icons/PhonelinkErase";
+import PhonelinkLockIcon from "@material-ui/icons/PhonelinkLock";
+import SettingsInputAntennaIcon from "@material-ui/icons/SettingsInputAntenna";
+import PortableWifiOffIcon from "@material-ui/icons/PortableWifiOff";
 
 import { PopMenu } from "./PopMenu";
 
@@ -15,11 +23,19 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1
+  },
+  icons: {
+    margin: theme.spacing(4)
   }
 }));
 
 export const AppHeader = props => {
-  const { prefersDarkMode, setprefersDarkMode } = props;
+  const {
+    arduinoConnectedToSerial,
+    connectionEstablished,
+    userDefaults,
+    setuserDefaults
+  } = props;
   const classes = useStyles();
 
   return (
@@ -29,9 +45,28 @@ export const AppHeader = props => {
           <Typography variant="h6" className={classes.title}>
             INFRACHAT
           </Typography>
+          {arduinoConnectedToSerial &&
+            (connectionEstablished ? (
+              <Tooltip title="Connected to Chatpartner!" placement="bottom">
+                <SettingsInputAntennaIcon className={classes.icon} />
+              </Tooltip>
+            ) : (
+              <Tooltip title="Not connecetd to Chatpartner!" placement="bottom">
+                <PortableWifiOffIcon className={classes.icon} />
+              </Tooltip>
+            ))}
+          {arduinoConnectedToSerial ? (
+            <Tooltip title="Secure Connection to Device!" placement="bottom">
+              <PhonelinkLockIcon className={classes.icon} />
+            </Tooltip>
+          ) : (
+            <Tooltip title="No Device Connected" placement="bottom">
+              <PhonelinkEraseIcon className={classes.icons} />
+            </Tooltip>
+          )}
           <PopMenu
-            prefersDarkMode={prefersDarkMode}
-            setprefersDarkMode={setprefersDarkMode}
+            userDefaults={userDefaults}
+            setuserDefaults={setuserDefaults}
           />
         </Toolbar>
       </AppBar>
