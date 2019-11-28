@@ -5,7 +5,7 @@ from cryptography.fernet import Fernet
 import base64
 import json
 
-def encryptAndDecryptMessage(data):
+def encryptAndDecryptMessage():
     password_input = "testString"
     password = password_input.encode()
     salt = b's3cr3ts4lt'
@@ -21,13 +21,14 @@ def encryptAndDecryptMessage(data):
     kdf2 = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=salt,
+        salt=b'JoaAnderesSalzHalt',
         iterations=100000,
         backend=default_backend()
     )
     key2 = base64.urlsafe_b64encode(kdf2.derive(password))
 
-    encrypted = Fernet(key).encrypt(data.encode())
+    # encrypted = Fernet(key).encrypt(data.encode())
+    encrypted = Fernet(key).encrypt(b'Great Message')
     x = {
         "message": str(encrypted.decode())
     }
@@ -38,3 +39,5 @@ def encryptAndDecryptMessage(data):
         "message": str(decrypted.decode())
     }
     print(json.dumps(y))
+
+encryptAndDecryptMessage()

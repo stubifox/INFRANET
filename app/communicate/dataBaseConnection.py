@@ -58,7 +58,7 @@ def main():
         insertToDb(sender=sender, message=message)
         print(json.dumps(data))
         decryptionTest.encryptAndDecryptMessage(json.dumps(data))
-        #jetzt sende den encrypted message
+        #send encrypted message
 
 
 if __name__ == '__main__':
