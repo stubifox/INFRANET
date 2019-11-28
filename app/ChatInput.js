@@ -1,5 +1,9 @@
 /**
- * author: Max Stubenbord
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:49:02
+ * @modify date 2019-11-28 22:49:02
+ * @desc [description]
  */
 
 import React, { useState } from "react";

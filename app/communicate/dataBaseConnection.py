@@ -1,5 +1,11 @@
+"""
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:49:49
+ * @modify date 2019-11-28 22:49:49
+ * @desc [description]
+"""
 # dataBaseConncetion.py
-# author: Max Stubenbord
 
 import sqlite3
 import sys

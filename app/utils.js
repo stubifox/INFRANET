@@ -1,5 +1,9 @@
 /**
- * author: Max Stubenbord
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:49:36
+ * @modify date 2019-11-28 22:49:36
+ * @desc [description]
  */
 
 import { PythonShell } from "python-shell";

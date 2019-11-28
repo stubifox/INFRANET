@@ -1,6 +1,11 @@
 /**
- * author: Max Stubenbord
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:48:38
+ * @modify date 2019-11-28 22:48:38
+ * @desc [description]
  */
+
 "use babel";
 
 import React, { useState, useEffect } from "react";

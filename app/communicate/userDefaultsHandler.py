@@ -1,3 +1,11 @@
+"""
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:50:24
+ * @modify date 2019-11-28 22:50:24
+ * @desc [description]
+"""
+
 import sqlite3
 import json
 import getFromDb

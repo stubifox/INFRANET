@@ -1,5 +1,11 @@
+"""
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:50:09
+ * @modify date 2019-11-28 22:50:09
+ * @desc [description]
+"""
 # getFromDb.py
-# author: Max Stubenbord
 
 import sqlite3
 import sys
