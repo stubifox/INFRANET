@@ -19,7 +19,7 @@ import uuidv1 from "uuid";
  */
 export const pyConnections = {
   /**
-   * @param {['initial', '']} exp an expression to say the func what to do, NOT REQUIRED!
+   * @param {['initial', '']} exp an expression telling the func what to do, NOT REQUIRED!
    * @param {string} message the  message to insert into the db
    * @param {string} sender the sender to insert into the db
    */
@@ -132,6 +132,7 @@ export const pyConnections = {
      */
     if (exp === "insertUUID") {
       const uuid = uuidv1();
+      setuserDefaults({ sender: uuid, userTheme: userTheme });
       pyShell.send(createDefaultsData(uuid, userTheme, "insert"));
     }
     /**
@@ -150,7 +151,7 @@ export const pyConnections = {
         console.log("message is indeed empty");
         pyConnections.userDefaultsHandler(
           { sender: sender, userTheme: userTheme },
-          setuserTheme,
+          setuserDefaults,
           "insertUUID"
         );
       } else if (exp === "initial") {
@@ -176,7 +177,6 @@ export const pyConnections = {
 };
 
 /**
- *
  * @param {String} fileName Python file in ./app/communicate folder!! without .py!!
  * @param {['json', 'text']} mode specifies the mode the data is send to Python
  * @returns {'PythonShell'} pyShell returns a Python Shell instance
@@ -188,11 +188,10 @@ const createPythonCon = (fileName, mode) => {
 };
 
 /**
- *
  * @param {string} message appending message to an obj
  * @param {string} sender apppending sender to an obj
  * @param {string} exp appending the expression to an obj
- * @returns {'object'} {} a object obj for communication with python
+ * @returns {'object'}  a object obj for communication with python
  */
 const createData = (message, sender, exp) => ({
   message: message,
@@ -201,11 +200,10 @@ const createData = (message, sender, exp) => ({
 });
 
 /**
- *
  * @param {'uuid'} uuid the identifier to append to the obj
  * @param {boolean} userTheme the specified user theme to append to the obj
  * @param {string} exp expression append to obj
- * @returns {'object'} {} a object for communication with python.
+ * @returns {'object'}  a object for communication with python.
  */
 const createDefaultsData = (uuid, userTheme, exp) => ({
   uuid: uuid,

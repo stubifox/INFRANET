@@ -6,8 +6,15 @@
  * @desc [description]
  */
 
-import React, { useState } from "react";
-import { TextField, Container, IconButton, Box } from "@material-ui/core";
+import React, { useState, useEffect } from "react";
+import {
+  TextField,
+  Container,
+  IconButton,
+  Box,
+  InputAdornment,
+  Typography
+} from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
 import { makeStyles } from "@material-ui/core/styles";
 import { pyConnections } from "./utils";
@@ -42,6 +49,8 @@ export const ChatInput = props => {
 
   const [text, settext] = useState(String);
   const [error, seterror] = useState(false);
+  const MAX_MESSAGE_LENGTH = 280;
+
   const submitText = event => {
     if (arduinoConnectedToSerial && connectionEstablished && text) {
       seterror(false);
@@ -57,16 +66,19 @@ export const ChatInput = props => {
   };
 
   const handleChange = event => {
-    settext(event.target.value);
+    if (event.target.value.length <= MAX_MESSAGE_LENGTH) {
+      settext(event.target.value);
+    }
   };
-  const handleErrors = () => {
+  const handleErrors =  () => {
     seterror(true);
     if (!arduinoConnectedToSerial) {
-      handleShowSnackBar("No Device connected to USB!", "error");
+       handleShowSnackBar("No Device connected to USB!", "error");
     }
     if (arduinoConnectedToSerial && !connectionEstablished) {
-      handleShowSnackBar("Not connected to Chatpartner!", "error");
+       handleShowSnackBar("Not connected to Chatpartner!", "error");
     }
+    setTimeout(() => seterror(false), 4000);
   };
 
   return (
@@ -96,9 +108,14 @@ export const ChatInput = props => {
             }}
             InputProps={{
               endAdornment: (
-                <IconButton size="medium" onClick={submitText}>
-                  <SendIcon color="primary" />
-                </IconButton>
+                <InputAdornment>
+                  <Typography>
+                    {text.length}/{MAX_MESSAGE_LENGTH}
+                  </Typography>
+                  <IconButton size="medium" onClick={submitText}>
+                    <SendIcon color="primary" />
+                  </IconButton>
+                </InputAdornment>
               )
             }}
           />
