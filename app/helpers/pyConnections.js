@@ -8,11 +8,18 @@
 
 import { PythonShell } from "python-shell";
 import { join } from "path";
+import {
+  createData,
+  createDefaultsData,
+  createReceivingData
+} from "./createDataObjects";
 import uuidv1 from "uuid";
+import { Action } from "./shared";
 
 /**
- * different Functions to communicate with Python Scripts
- * states are being updated depending on returning message of the Scripts
+ * Object holding different Functions to communicate with Python Scripts.
+ *
+ * states are being updated depending on returning message of the Scripts.
  *
  * Communication realized via Stdin and Stdout.
  * protocol for communication is JSON.
@@ -30,17 +37,18 @@ export const pyConnections = {
      * on initial App load just check if DB is existent.
      */
 
-    if (exp === "initial") {
+    if (exp === Action.INITIAL) {
       pyShell.send(createData("", "", exp));
-    } else {
+    } else if (exp === Action.INSERT) {
+      console.log("insert");
       /**
-       * normal message input received. put message and sender into DB.
+       * normal message input received. store message and sender into DB.
        */
       pyShell.send(createData(message, sender, exp));
     }
 
     pyShell.on("message", message => {
-      console.log(`insertIntoDB with: ${message}`);
+      console.log(message);
     });
 
     //   end the input stream and allow the process to exit
@@ -55,44 +63,47 @@ export const pyConnections = {
 
   /**
    * @param {['loadMore', 'initial', 'entry']} exp an expression to say the func what to do
-   * @param {'function'} setstateFunc a state Function to update the state
-   * @param {'React.state'} state the corresponding state to the state Function
+   * @param {'function'} setmessages a state Function to update the state
+   * @param {'React.state'} messages the corresponding state to the state Function
    */
 
-  getFromDb: async (exp, setstateFunc, state) => {
+  getFromDb: async (exp, setmessages, messages) => {
+    console.log(exp);
     const pyShell = createPythonCon("getFromDb", "json");
 
     /**
      * load more entries out of DB starting with id at index 0 of current message Array.
      */
-    if (exp === "loadMore") {
-      pyShell.send({ load: exp, id: state[0].id });
+    if (exp === Action.LOAD_MORE) {
+      // pyShell.send({ load: exp, id: messages[0].id, receiver: receiver });
+      pyShell.send(createReceivingData(exp, messages[0].id));
     } else {
       /**
        * load last 20 messages out of DB.
        */
-      pyShell.send({ load: exp });
+      pyShell.send(createReceivingData(exp, ""));
     }
 
     await pyShell.on("message", response => {
+      console.log(response);
       /**
-       * initial load message Array is just filled with whole response (20 messages)
+       * initial load: message-Array is just filled with whole response (20 messages)
        */
-      if (exp === "initial") {
-        setstateFunc(response);
+      if (exp === Action.INITIAL) {
+        setmessages(response);
 
         /**
          * getting the last inserted Message out of DB.
          * happens when user inputs a message.
          */
-      } else if (exp === "entry") {
-        setstateFunc([...state, response[0]]);
+      } else if (exp === Action.ENTRY) {
+        setmessages([...messages, response[0]]);
         /**
          * user wants to load more messages starting from top.
          * will be appended in front of current state.
          */
-      } else if (exp === "loadMore") {
-        setstateFunc([...response, ...state]);
+      } else if (exp === Action.LOAD_MORE) {
+        setmessages([...response, ...messages]);
       } else {
         console.error("queue is not defined!!" + exp);
       }
@@ -121,8 +132,8 @@ export const pyConnections = {
      * checking if user has already default Data stored in the DB.
      * if so Python File will return the data.
      */
-    if (exp === "initial") {
-      pyShell.send(createDefaultsData("", "", "check"));
+    if (exp === Action.INITIAL) {
+      pyShell.send(createDefaultsData("", "", Action.CHECK));
     }
 
     /**
@@ -130,31 +141,32 @@ export const pyConnections = {
      * also create a UUID for identification purposes.
      * uuid is also the sender stored in the DB.
      */
-    if (exp === "insertUUID") {
+    if (exp === Action.INSERT_UUID) {
       const uuid = uuidv1();
       setuserDefaults({ sender: uuid, userTheme: userTheme });
-      pyShell.send(createDefaultsData(uuid, userTheme, "insert"));
+      pyShell.send(createDefaultsData(uuid, userTheme, Action.INSERT));
     }
     /**
-     * if user Changes his Theme the Theme preference is also stored in the DB.
+     * if user Changes his Theme the Theme preference will be refreshed inside the DB.
      */
-    if (exp === "updateTheme") {
-      pyShell.send(createDefaultsData(sender, userTheme, "insert"));
+    if (exp === Action.UPDATE_THEME) {
+      pyShell.send(createDefaultsData(sender, userTheme, Action.INSERT));
     }
 
     pyShell.on("message", message => {
+      console.log(message);
       /**
        * case: no data is held in the userDefaults in DB.
-       * Calling this Function again with exp insertUUID to insert into DB and create a uuid.
+       * Recursively calling this Function again when no data provided
+       * with exp insertUUID to insert into DB and create a uuid.
        */
       if (message.length === 0) {
-        console.log("message is indeed empty");
         pyConnections.userDefaultsHandler(
           { sender: sender, userTheme: userTheme },
           setuserDefaults,
-          "insertUUID"
+          Action.INSERT_UUID
         );
-      } else if (exp === "initial") {
+      } else if (exp === Action.INITIAL) {
         /**
          * data is already present in the DB.
          * storing response in its attendant state.
@@ -182,31 +194,10 @@ export const pyConnections = {
  * @returns {'PythonShell'} pyShell returns a Python Shell instance
  */
 const createPythonCon = (fileName, mode) => {
-  return new PythonShell(join(__dirname, "communicate", `${fileName}.py`), {
-    mode: mode
-  });
+  return new PythonShell(
+    join(__dirname, "..", "communicate", `${fileName}.py`),
+    {
+      mode: mode
+    }
+  );
 };
-
-/**
- * @param {string} message appending message to an obj
- * @param {string} sender apppending sender to an obj
- * @param {string} exp appending the expression to an obj
- * @returns {'object'}  a object obj for communication with python
- */
-const createData = (message, sender, exp) => ({
-  message: message,
-  sender: sender,
-  load: exp
-});
-
-/**
- * @param {'uuid'} uuid the identifier to append to the obj
- * @param {boolean} userTheme the specified user theme to append to the obj
- * @param {string} exp expression append to obj
- * @returns {'object'}  a object for communication with python.
- */
-const createDefaultsData = (uuid, userTheme, exp) => ({
-  uuid: uuid,
-  theme: userTheme,
-  load: exp
-});

@@ -7,10 +7,11 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Grid, Fab, Tooltip, IconButton } from "@material-ui/core";
-import { pyConnections } from "./utils.js";
+import { pyConnections } from "./helpers/pyConnections";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ChatMessages } from "./ChatMessages";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
+import { Action } from "./helpers/shared";
 
 export const ChatWindow = props => {
   const {
@@ -32,18 +33,18 @@ export const ChatWindow = props => {
    *
    */
   useEffect(() => {
-    if (!arduinoConnectedToSerial) {
-      pyConnections.insertIntoDb("", "", "initial");
-      pyConnections.getFromDb("initial", setmessages, messages);
-      setexp("initial");
+    if (arduinoConnectedToSerial) {
+      pyConnections.insertIntoDb("", "", Action.INITIAL);
+      pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
+      setexp(Action.INITIAL);
     }
-    if (exp !== "loadMore") {
+    if (exp !== Action.LOAD_MORE) {
       scrollToBottom();
     }
   }, []);
 
   useEffect(() => {
-    if (exp !== "loadMore") {
+    if (exp !== Action.LOAD_MORE) {
       scrollToBottom();
     }
   }, [messages]);
@@ -63,8 +64,8 @@ export const ChatWindow = props => {
   };
 
   const loadOlderMessages = () => {
-    pyConnections.getFromDb("loadMore", setmessages, messages);
-    setexp("loadMore");
+    pyConnections.getFromDb(Action.LOAD_MORE, setmessages, messages);
+    setexp(Action.LOAD_MORE);
   };
 
   return (

@@ -6,7 +6,7 @@
  * @desc [description]
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   TextField,
   Container,
@@ -17,7 +17,8 @@ import {
 } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
 import { makeStyles } from "@material-ui/core/styles";
-import { pyConnections } from "./utils";
+import { pyConnections } from "./helpers/pyConnections";
+import { Action } from "./helpers/shared";
 
 const useStyles = makeStyles(theme => ({
   box: {
@@ -54,12 +55,11 @@ export const ChatInput = props => {
   const submitText = event => {
     if (arduinoConnectedToSerial && connectionEstablished && text) {
       seterror(false);
-      pyConnections.insertIntoDb(text, sender);
-      pyConnections.getFromDb("entry", setmessages, messages);
-      handleShowSnackBar("message send!", "success");
-      setexp("entry");
+      pyConnections.insertIntoDb(text, sender, Action.INSERT);
+      pyConnections.getFromDb(Action.ENTRY, setmessages, messages);
+      setexp(Action.ENTRY);
       settext("");
-    } else {
+    } else if (text) {
       handleErrors();
     }
     event.preventDefault();
@@ -70,13 +70,13 @@ export const ChatInput = props => {
       settext(event.target.value);
     }
   };
-  const handleErrors =  () => {
+  const handleErrors = () => {
     seterror(true);
     if (!arduinoConnectedToSerial) {
-       handleShowSnackBar("No Device connected to USB!", "error");
+      handleShowSnackBar("No Device connected to USB!", "error");
     }
     if (arduinoConnectedToSerial && !connectionEstablished) {
-       handleShowSnackBar("Not connected to Chatpartner!", "error");
+      handleShowSnackBar("Not connected to Chatpartner!", "error");
     }
     setTimeout(() => seterror(false), 4000);
   };

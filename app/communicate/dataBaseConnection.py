@@ -12,7 +12,8 @@ import sys
 import os
 import json
 import getFromDb
-
+from shared import Action
+from shared import DictIndex
 
 path = os.path.join(os.path.dirname(__file__), '..',
                     '..',  'Log', 'chatLog.db')
@@ -70,13 +71,12 @@ def insertToDb(sender, message,):
 
 def main():
     data = read_in_stdin()
-    if data['load'] == 'initial':
+    if data[DictIndex.LOAD.value] == Action.INITIAL.value:
         createDataBase()
         createSettingsTable()
         return
-    else:
-        #! data muss immer von der Form sein: {"message": "...", "sender": "..."}!, wird aber im frontend behandelt
-        message, sender = data['message'], data['sender']
+    elif data[DictIndex.LOAD.value] == Action.INSERT.value:
+        message, sender = data[DictIndex.MESSAGE.value], data[DictIndex.SENDER.value]
         insertToDb(sender=sender, message=message)
 
 

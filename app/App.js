@@ -17,7 +17,8 @@ import { createMuiTheme } from "@material-ui/core/styles";
 import { purple } from "@material-ui/core/colors";
 import { AppHeader } from "./AppHeader";
 import { CustomizedSnackbar } from "./CustomSnackBar";
-import { pyConnections } from "./utils";
+import { pyConnections } from "./helpers/pyConnections";
+import { Action } from "./helpers/shared";
 
 const App = () => {
   /**
@@ -25,10 +26,10 @@ const App = () => {
    */
   const [messages, setmessages] = useState([]);
   const [arduinoConnectedToSerial, setarduinoConnectedToSerial] = useState(
-    false
+    true
   );
   const [connectedChatPartner, setconnectedChatPartner] = useState(String);
-  const [connectionEstablished, setconnectionEstablished] = useState(false);
+  const [connectionEstablished, setconnectionEstablished] = useState(true);
   const [exp, setexp] = useState(String);
   const defaultStateSnackBar = {
     display: false,
@@ -72,7 +73,7 @@ const App = () => {
     pyConnections.userDefaultsHandler(
       userDefaults,
       setuserDefaults,
-      "updateTheme"
+      Action.UPDATE_THEME
     );
   }, [userDefaults.userTheme]);
 
@@ -80,7 +81,11 @@ const App = () => {
    * on initial App load look if user has any Defaults declared, look up uuid(sender)
    */
   useEffect(() => {
-    pyConnections.userDefaultsHandler(userDefaults, setuserDefaults, "initial");
+    pyConnections.userDefaultsHandler(
+      userDefaults,
+      setuserDefaults,
+      Action.INITIAL
+    );
   }, []);
 
   /**

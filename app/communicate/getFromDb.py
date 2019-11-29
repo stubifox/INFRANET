@@ -12,6 +12,7 @@ import sys
 import os
 import dataBaseConnection as dbCon
 import json
+from shared import Action, DictIndex
 
 
 def json_factory(cursor, row):
@@ -75,14 +76,14 @@ def loadMoreEntrys(startID):
 
 def main():
     load = dbCon.read_in_stdin()
-    exp = load['load']
+    exp = load[DictIndex.LOAD.value]
 
-    if exp == 'initial':
+    if exp == Action.INITIAL.value:
         getInitialLoad()
-    elif exp == 'entry':
+    elif exp == Action.ENTRY.value:
         getInsertedValue()
-    elif exp == 'loadMore':
-        startID = load['id']
+    elif exp == Action.LOAD_MORE.value:
+        startID = load[DictIndex.ID.value]
         loadMoreEntrys(startID=startID)
 
 
