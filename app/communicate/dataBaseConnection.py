@@ -14,6 +14,7 @@ import json
 import getFromDb
 from shared import Action
 from shared import DictIndex
+import decryptionTest
 
 path = os.path.join(os.path.dirname(__file__), '..',
                     '..',  'Log', 'chatLog.db')
@@ -78,6 +79,7 @@ def main():
     elif data[DictIndex.LOAD.value] == Action.INSERT.value:
         message, sender = data[DictIndex.MESSAGE.value], data[DictIndex.SENDER.value]
         insertToDb(sender=sender, message=message)
+
 
 
 if __name__ == '__main__':
