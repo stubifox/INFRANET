@@ -56,9 +56,7 @@ def main():
         #! data muss immer von der Form sein: {"message": "...", "sender": "..."}!, wird aber im frontend behandelt
         message, sender = data['message'], data['sender']
         insertToDb(sender=sender, message=message)
-        print(json.dumps(data))
-        decryptionTest.encryptAndDecryptMessage(json.dumps(data))
-        #send encrypted message
+
 
 
 if __name__ == '__main__':
