@@ -14,18 +14,22 @@ def encryptAndDecryptMessage():
     recipient.generate_public_key()
 
     sender.generate_shared_secret(recipient.public_key)
+    recipient.generate_shared_secret(sender.public_key)
 
-    print("-----------------------------SENDER SHARED KEY")
-    print(sender.shared_key)
-    print("-----------------------------SENDER SHARED SECRET")
-    print(sender.shared_secret)
+    message = "very great secret message from sender <3"
 
-    key = Fernet.generate_key
-    print("-----------------------------FERNET KEY")
-    print(str(key))
+    # SENDER SIDE
+    blakeSender = blake2b(digest_size=16)
+    blakeSender.update(sender.shared_key.encode())
+    fernetSender = Fernet(base64.urlsafe_b64encode(blakeSender.hexdigest().encode()))
+    encryptedMessage = fernetSender.encrypt(message.encode())
 
-    blake = blake2b(digest_size=16)
-    blake.update(sender.shared_key.encode())
+    # RECIPIENT SITE
+    blakeRecipient = blake2b(digest_size=16)
+    blakeRecipient.update(recipient.shared_key.encode())
+    fernetRecipient = Fernet(base64.urlsafe_b64encode(blakeRecipient.hexdigest().encode()))
+    decryptedMessage = fernetRecipient.decrypt(encryptedMessage)
+    print(decryptedMessage.decode())
 
     print("-----------------------------SENDER SHARED KEY AS BYTES")
     print(blake.hexdigest())
