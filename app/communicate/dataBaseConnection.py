@@ -14,7 +14,6 @@ import json
 import getFromDb
 from shared import Action
 from shared import DictIndex
-import decryptionTest
 
 path = os.path.join(os.path.dirname(__file__), '..',
                     '..',  'Log', 'chatLog.db')
