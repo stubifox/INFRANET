@@ -19,10 +19,11 @@ import { Action } from "./shared";
 /**
  * Object holding different Functions to communicate with Python Scripts.
  *
- * states are being updated depending on returning message of the Scripts.
+ * States are being updated depending on returning message of the Scripts.
  *
  * Communication realized via Stdin and Stdout.
- * protocol for communication is JSON.
+ * 
+ * Protocol for communication is JSON.
  */
 export const pyConnections = {
   /**
@@ -40,7 +41,6 @@ export const pyConnections = {
     if (exp === Action.INITIAL) {
       pyShell.send(createData("", "", exp));
     } else if (exp === Action.INSERT) {
-      console.log("insert");
       /**
        * normal message input received. store message and sender into DB.
        */
@@ -51,7 +51,6 @@ export const pyConnections = {
       console.log(message);
     });
 
-    //   end the input stream and allow the process to exit
     pyShell.end((err, code, signal) => {
       if (err) throw err;
       console.log(
@@ -68,14 +67,12 @@ export const pyConnections = {
    */
 
   getFromDb: async (exp, setmessages, messages) => {
-    console.log(exp);
     const pyShell = createPythonCon("getFromDb", "json");
 
     /**
      * load more entries out of DB starting with id at index 0 of current message Array.
      */
     if (exp === Action.LOAD_MORE) {
-      // pyShell.send({ load: exp, id: messages[0].id, receiver: receiver });
       pyShell.send(createReceivingData(exp, messages[0].id));
     } else {
       /**
@@ -109,7 +106,6 @@ export const pyConnections = {
       }
     });
 
-    //   end the input stream and allow the process to exit
     pyShell.end((err, code, signal) => {
       if (err) throw err;
       console.log(
