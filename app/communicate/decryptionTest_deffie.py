@@ -34,4 +34,6 @@ def encryptAndDecryptMessage(message):
     blakeRecipient.update(recipient.shared_key.encode())
     fernetRecipient = Fernet(base64.urlsafe_b64encode(blakeRecipient.hexdigest().encode()))
     decryptedMessage = fernetRecipient.decrypt(encryptedMessage)
-    print(decryptedMessage)
+    print(decryptedMessage.decode())
+
+encryptAndDecryptMessage("Great message from our sponsor BEST MOBILE GAME EVAAA")
