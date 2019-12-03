@@ -9,3 +9,10 @@ export const Action = {
   UPDATE_THEME: 8,
   INSERT: 9
 };
+
+export const SnackBarStyle = {
+  SUCCESS: "success",
+  WARNING: "warning",
+  INFO: "info",
+  ERROR: "error"
+};

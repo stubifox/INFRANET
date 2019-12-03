@@ -22,3 +22,4 @@ class DictIndex(Enum):
     ID = 'id'
     UUID = 'uuid'
     THEME = 'theme'
+    ERROR = 'error'

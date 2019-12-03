@@ -7,7 +7,6 @@
  */
 
 import React from "react";
-import PropTypes from "prop-types";
 import clsx from "clsx";
 import Button from "@material-ui/core/Button";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";

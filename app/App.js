@@ -18,7 +18,7 @@ import { purple } from "@material-ui/core/colors";
 import { AppHeader } from "./AppHeader";
 import { CustomizedSnackbar } from "./CustomSnackBar";
 import { pyConnections } from "./helpers/pyConnections";
-import { Action } from "./helpers/shared";
+import { Action, SnackBarStyle } from "./helpers/shared";
 
 const App = () => {
   /**
@@ -47,7 +47,7 @@ const App = () => {
   /**
    *
    * @param {string} message message to display in the Snackbar
-   * @param {["error", "info", "warning", "success"]} variant styling of SnackBar
+   * @param {SnackBarStyle} variant styling of SnackBar
    * @param {number} timeout optional timeout
    */
   const handleShowSnackBar = (message, variant, timeout = 4000) => {
@@ -94,13 +94,16 @@ const App = () => {
    */
   useEffect(() => {
     arduinoConnectedToSerial
-      ? handleShowSnackBar("Device connected to USB!", "success")
-      : handleShowSnackBar("No device connected to USB!", "error");
+      ? handleShowSnackBar("Device connected to USB!", SnackBarStyle.SUCCESS)
+      : handleShowSnackBar("No device connected to USB!", SnackBarStyle.ERROR);
 
     arduinoConnectedToSerial &&
       (connectionEstablished
-        ? handleShowSnackBar("Connected to Chatpartner", "success")
-        : handleShowSnackBar("Not connected to Chatpartner!", "warning"));
+        ? handleShowSnackBar("Connected to Chatpartner", SnackBarStyle.SUCCESS)
+        : handleShowSnackBar(
+            "Not connected to Chatpartner!",
+            SnackBarStyle.WARNING
+          ));
   }, [arduinoConnectedToSerial, connectionEstablished]);
 
   return (
