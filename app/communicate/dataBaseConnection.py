@@ -14,7 +14,10 @@ import json
 import getFromDb
 from shared import Action
 from shared import DictIndex
+from helperClasses import DataBaseUtilities, UniversalUtilities
 
+
+# deprecated BEGIN
 path = os.path.join(os.path.dirname(__file__), '..',
                     '..',  'Log', 'chatLog.db')
 
@@ -30,22 +33,18 @@ def connectDb():
 def read_in_stdin():
     return json.loads(sys.stdin.readline())
 
+# deprecated END
+
 
 def createSettingsTable():
-    con = connectDb()
-    dbcursor = con.cursor()
     sql = '''CREATE TABLE IF NOT EXISTS settings(
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
     ) '''
-    dbcursor.execute(sql)
-    con.commit()
-    con.close()
+    DataBaseUtilities.insertIntoDb(sqlInsertStatement=sql)
 
 
 def createDataBase():
-    con = connectDb()
-    dbcursor = con.cursor()
     sql = '''CREATE TABLE IF NOT EXISTS message_log(
         id INTEGER PRIMARY KEY AUTOINCREMENT ,
         sender TEXT NOT NULL,
@@ -53,32 +52,24 @@ def createDataBase():
         date TEXT NOT NULL,
         message TEXT NOT NULL
     ) '''
-
-    dbcursor.execute(sql)
-    con.commit()
-    con.close()
+    DataBaseUtilities.insertIntoDb(sqlInsertStatement=sql)
 
 
-def insertToDb(sender, message,):
-    con = connectDb()
-    dbcursor = con.cursor()
+def insertMessageAndSender(sender, message):
     sql = '''INSERT INTO message_log (sender, time, date, message)
         VALUES(?, time('now', 'localtime'), date('now'), ?)'''
-    dbcursor.execute(sql, (sender, message))
-    con.commit()
-    con.close()
+    DataBaseUtilities.insertIntoDb(sql, sender, message)
 
 
 def main():
-    data = read_in_stdin()
+    data = UniversalUtilities.read_in_stdin_json()
     if data[DictIndex.LOAD.value] == Action.INITIAL.value:
         createDataBase()
         createSettingsTable()
         return
     elif data[DictIndex.LOAD.value] == Action.INSERT.value:
         message, sender = data[DictIndex.MESSAGE.value], data[DictIndex.SENDER.value]
-        insertToDb(sender=sender, message=message)
-
+        insertMessageAndSender(sender=sender, message=message)
 
 
 if __name__ == '__main__':

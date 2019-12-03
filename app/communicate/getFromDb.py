@@ -15,6 +15,17 @@ import json
 from shared import Action, DictIndex
 from helperClasses import UniversalUtilities, DataBaseUtilities
 
+# deprecated BEGIN
+
+
+def json_factory(cursor, row):
+    sqliteJson = {}
+    for idx, col in enumerate(cursor.description):
+        sqliteJson[col[0]] = row[idx]
+    return sqliteJson
+
+# deprecated END
+
 
 def getInitialLoad():
     sql = ''' SELECT *
@@ -50,7 +61,7 @@ def loadMoreEntrys(startID):
 
 
 def main():
-    load = dbCon.read_in_stdin()
+    load = UniversalUtilities.read_in_stdin_json()
     exp = load[DictIndex.LOAD.value]
 
     if exp == Action.INITIAL.value:

@@ -10,27 +10,18 @@ import json
 import getFromDb
 import dataBaseConnection as dbCon
 from shared import Action, DictIndex
+from helperClasses import DataBaseUtilities, UniversalUtilities
 
 
 def getDefaultsFromSettingsTable():
-    con = dbCon.connectDb()
-    con.row_factory = getFromDb.json_factory
-    dbcursor = con.cursor()
     sql = '''SELECT * FROM settings'''
-    dbcursor.execute(sql)
-    defSettings = dbcursor.fetchall()
-    print(json.dumps(defSettings))
-    con.close()
+    DataBaseUtilities.sendDataToFrontendFromDb(sqlStatement=sql)
 
 
 def insertDefaults(uuid, theme):
-    con = dbCon.connectDb()
-    dbCursor = con.cursor()
     sqlInsert = '''INSERT OR REPLACE INTO settings (key, value)
         VALUES('uuid', ?), ('theme', ?)'''
-    dbCursor.execute(sqlInsert, (uuid, str(theme)))
-    con.commit()
-    con.close()
+    DataBaseUtilities.insertIntoDb(sqlInsert, uuid, str(theme))
 
 
 def main():

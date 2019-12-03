@@ -7,7 +7,8 @@ export const Action = {
   CHECK: 6,
   INSERT_UUID: 7,
   UPDATE_THEME: 8,
-  INSERT: 9
+  INSERT: 9,
+  ERROR: "error"
 };
 
 export const SnackBarStyle = {
@@ -15,4 +16,10 @@ export const SnackBarStyle = {
   WARNING: "warning",
   INFO: "info",
   ERROR: "error"
+};
+
+export const printErrorOnConsoleIfOccurred = res => {
+  if (res[0].hasOwnProperty(Action.ERROR)) {
+    console.error(res[0][Action.ERROR]);
+  }
 };

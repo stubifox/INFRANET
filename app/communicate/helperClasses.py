@@ -1,4 +1,10 @@
-# author: Max Stubenbord
+"""
+ * @author Max Stubenbord
+ * @email max.stubi@googlemail.com
+ * @create date 2019-11-28 22:50:24
+ * @modify date 2019-11-28 22:50:24
+ * @desc [description]
+"""
 # helperClasses.js
 import os.path as path
 import json
@@ -8,8 +14,8 @@ import sys
 
 
 class DataBaseUtilities:
-    pathToDb = path.join(path.dirname(__file__),
-                         '..', '..',  'Log', 'chatLog.db')
+    _pathToDb = path.join(path.dirname(__file__),
+                          '..', '..',  'Log', 'chatLog.db')
 
     @staticmethod
     def _json_factory(cursor, row):
@@ -21,7 +27,7 @@ class DataBaseUtilities:
     @staticmethod
     def dbConnection():
         try:
-            con = sqlite3.connect(DataBaseUtilities.pathToDb)
+            con = sqlite3.connect(DataBaseUtilities._pathToDb)
             con.row_factory = DataBaseUtilities._json_factory
             return con
         except sqlite3.Error as error:
@@ -41,6 +47,7 @@ class DataBaseUtilities:
         connection = DataBaseUtilities.dbConnection()
         cursor = connection.cursor()
         cursor.execute(sqlInsertStatement, (*sqlVariablesInOrder,))
+        connection.commit()
         connection.close()
 
     @staticmethod
