@@ -8,12 +8,11 @@ import dataBaseConnection
 import jsonpickle
 import base64
 
-# darf ich die errors überhaupt printen oder wie mach ich das?
 class EncryptionHandler:
     
     def createAndSaveSharedSecret(self, foreignPublicKey):
         '''Takes a public key from someone else and generates a sharedSecret'''
-        keyHandler = self._getKeyHandlerJsonFromDb()
+        keyHandler = self._getKeyHandlerFromDb()
         try:
             keyHandler.generate_shared_secret(foreignPublicKey)
         except MalformedPublicKey:
@@ -21,24 +20,24 @@ class EncryptionHandler:
         self._insertKeyHandlerIntoDb(keyHandler)
 
     def encryptString(self, stringToEncrypt):
-        '''This method returns void if the encryption fails'''
-        keyHandler = self._getKeyHandlerJsonFromDb()
+        '''TReturns void if the encryption fails'''
+        keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=16)
         try:
             blake.update(keyHandler.shared_key.encode())
             fernet = Fernet(base64.urlsafe_b64encode(blake.hexdigest().encode()))
+            # auf länge cappen (max 511 bytes) warten auf Kai
             return fernet.encrypt(json.dumps(stringToEncrypt).encode())
         except AttributeError:
             print("ERROR: Could not encrypt String. Please create a shared_secret with the createAndSaveSharedSecret() method beforehand")
-            return
+            return None
         except InvalidToken:
             print("ERROR: Could not encrypt String. Please ensure a correct transfered public_key")
-            return
+            return None
         
-
     def decryptByteArray(self, encryptedByteArray):
-        '''This method returns void if the decryption fails'''
-        keyHandler = self._getKeyHandlerJsonFromDb()
+        '''Returns void if the decryption fails'''
+        keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=16)
         try:
             blake.update(keyHandler.shared_key.encode())
@@ -46,13 +45,18 @@ class EncryptionHandler:
             return json.loads(fernet.decrypt(encryptedByteArray))
         except AttributeError:
             print("ERROR: Please create a shared_secret with the createAndSaveSharedSecret() method beforehand")
-            return
+            return None
         except InvalidToken:
             print("ERROR: Please ensure a correct transfered public_key")
-            return
+            return None
+
+    def getLocalPublicKey(self):
+        '''Returns the local public_key as string'''
+        keyHandler = self._getKeyHandlerFromDb()
+        return str(keyHandler.public_key)
 
     def _createAndSaveEncryptionKeys(self):
-        keyHandler = DiffieHellman()
+        keyHandler = DiffieHellman(key_length=200, group=5)
         keyHandler.generate_public_key()
         self._insertKeyHandlerIntoDb(keyHandler)
         return keyHandler
@@ -68,7 +72,7 @@ class EncryptionHandler:
         connection.commit()
         connection.close()
 
-    def _getKeyHandlerJsonFromDb(self):
+    def _getKeyHandlerFromDb(self):
         '''Fetches the DiffieHellman JSON from the settings table and returns the decoded class'''
         connection = dataBaseConnection.connectDb()
         connection.row_factory = getFromDb.json_factory
@@ -81,15 +85,21 @@ class EncryptionHandler:
             return self._createAndSaveEncryptionKeys()
         return jsonpickle.decode(results[0]["value"])
 
+# DEBUGGING AND TESTING
+#
+#
 # keyHandler2 = DiffieHellman()
 # keyHandler2.generate_public_key()
 
-# createAndSaveEncryptionKeys()
-# createAndSaveSharedSecret(keyHandler2.public_key)
+# encryptionHandler = EncryptionHandler()
+# # encryptionHandler.createAndSaveSharedSecret(keyHandler2.public_key)
 # message = { "message": "HEEEY WASSS UP HIER MEINE FINANZDATEN LG qwertzuioasdfghjk", "sender": "qwertzuioasdfghjk" }
-# encryptedMessage = encryptString(message)
-# print(encryptedMessage)
-# print(decryptByteArray(encryptedMessage))
+# encryptedM = encryptionHandler.encryptString(json.dumps(message))
+# messageRecovered = encryptionHandler.decryptByteArray(encryptedM)
+# print(messageRecovered)
+
 
 # encryptionHandler.createAndSaveSharedSecret(keyHandler2.public_key - 1) // raises MalformedPublicKey
 # fernet.decrypt raises InvalidToken
+
+# method getPublicKey()
