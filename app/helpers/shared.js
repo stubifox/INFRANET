@@ -19,7 +19,7 @@ export const SnackBarStyle = {
 };
 
 export const printErrorOnConsoleIfOccurred = res => {
-  if (res[0].hasOwnProperty(Action.ERROR)) {
-    console.error(res[0][Action.ERROR]);
+  if (res.hasOwnProperty(Action.ERROR)) {
+    console.error(res);
   }
 };

@@ -32,7 +32,7 @@ export const pyConnections = {
    * @param {string} sender the sender to insert into the db
    */
 
-  insertIntoDb: (message, sender, exp = "") => {
+  insertIntoDb: async (message, sender, exp = "") => {
     const pyShell = createPythonCon("dataBaseConnection", "json");
 
     if (exp === Action.INITIAL) {
@@ -44,10 +44,10 @@ export const pyConnections = {
     pyShell.on("message", message => {
       printErrorOnConsoleIfOccurred(message);
 
-      console.log(message);
+      console.error(message);
     });
 
-    pyShell.end((err, code, signal) => {
+    await pyShell.end((err, code, signal) => {
       if (err) throw err;
       console.log(
         `Python File dataBaseConnection.py ended with code: ${code} and signal: ${signal}`
