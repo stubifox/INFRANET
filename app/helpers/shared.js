@@ -8,7 +8,8 @@ export const Action = {
   INSERT_UUID: 7,
   UPDATE_THEME: 8,
   INSERT: 9,
-  ERROR: "error"
+  ERROR: "error",
+  INFO: "info"
 };
 
 export const SnackBarStyle = {
@@ -18,8 +19,12 @@ export const SnackBarStyle = {
   ERROR: "error"
 };
 
-export const printErrorOnConsoleIfOccurred = res => {
-  if (res[0].hasOwnProperty(Action.ERROR)) {
-    console.error(res[0][Action.ERROR]);
+export const printLoggingOrErrorMessages = res => {
+  if (res.hasOwnProperty(Action.ERROR)) {
+    console.error(res);
+    return;
+  }
+  if (res.hasOwnProperty(Action.INFO)) {
+    console.info(res);
   }
 };

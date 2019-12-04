@@ -92,7 +92,7 @@ export const ChatInput = props => {
         <form onSubmit={submitText}>
           <TextField
             error={error}
-            color="secondary"
+            color="primary"
             fullWidth
             id="outlined-multiline-static"
             label="Send Text"
