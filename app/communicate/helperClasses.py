@@ -72,3 +72,10 @@ class UniversalUtilities:
         caller = getframeinfo(stack()[1][0])
         print(json.dumps({DictIndex.ERROR.value:  "in File {}:{}, message: {}".format(
             caller.filename, caller.lineno, str(errorMessage))}))
+
+    @staticmethod
+    def sendInfoMessageToFrontend(infoMessage):
+        # getting Filename and Line from which this method is called
+        caller = getframeinfo(stack()[1][0])
+        print(json.dumps({DictIndex.INFO.value:  "in File {}:{}, message: {}".format(
+            caller.filename, caller.lineno, str(infoMessage))}))
