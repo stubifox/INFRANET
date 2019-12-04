@@ -24,12 +24,10 @@ class EncryptionHandler:
     def encryptString(self, stringToEncrypt):
         '''TReturns void if the encryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
-        blake = blake2b(digest_size=16)
+        blake = blake2b(digest_size=32)
         try:
             blake.update(keyHandler.shared_key.encode())
-            fernet = Fernet(base64.urlsafe_b64encode(
-                blake.hexdigest().encode()))
-            # auf länge cappen (max 511 bytes) warten auf Kai
+            fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
             return fernet.encrypt(json.dumps(stringToEncrypt).encode())
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
@@ -41,11 +39,10 @@ class EncryptionHandler:
     def decryptByteArray(self, encryptedByteArray):
         '''Returns void if the decryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
-        blake = blake2b(digest_size=16)
+        blake = blake2b(digest_size=32)
         try:
             blake.update(keyHandler.shared_key.encode())
-            fernet = Fernet(base64.urlsafe_b64encode(
-                blake.hexdigest().encode()))
+            fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
             return json.loads(fernet.decrypt(encryptedByteArray))
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
@@ -60,7 +57,9 @@ class EncryptionHandler:
         return str(keyHandler.public_key)
 
     def _createAndSaveEncryptionKeys(self):
-        keyHandler = DiffieHellman(key_length=200, group=5)
+        # needs to be called always on startup of new connection so
+        # probably call it in getLocalPublicKey (how often does it get called?)
+        keyHandler = DiffieHellman(group=5)
         keyHandler.generate_public_key()
         self._insertKeyHandlerIntoDb(keyHandler)
         return keyHandler
