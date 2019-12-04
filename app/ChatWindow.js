@@ -14,14 +14,7 @@ import AutorenewIcon from "@material-ui/icons/Autorenew";
 import { Action } from "./helpers/shared";
 
 export const ChatWindow = props => {
-  const {
-    messages,
-    setmessages,
-    exp,
-    setexp,
-    arduinoConnectedToSerial,
-    sender
-  } = props;
+  const { messages, setmessages, exp, setexp, externalStates, sender } = props;
   const bottomRef = useRef();
   const [scrollButton, showscrollButton] = useState(false);
 
@@ -33,7 +26,7 @@ export const ChatWindow = props => {
    *
    */
   useEffect(() => {
-    if (arduinoConnectedToSerial) {
+    if (externalStates.internalArduinoConnected) {
       pyConnections.insertIntoDb("", "", Action.INITIAL);
       pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
       setexp(Action.INITIAL);

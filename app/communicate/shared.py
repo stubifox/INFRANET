@@ -31,3 +31,7 @@ class DictIndex(Enum):
     THEME = 'theme'
     ERROR = 'error'
     INFO = 'info'
+    LOCAL_ARDUINO_STATE = 'localArduinoState'
+    EXTERNAL_ARDUINO_STATE = 'externalArduinoState'
+    SHOULD_UPDATE_MESSAGES = 'shouldUpdateMessages'
+    NEW_MESSAGES = 'newMessages'

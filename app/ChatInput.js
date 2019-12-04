@@ -41,9 +41,8 @@ export const ChatInput = props => {
     messages,
     setmessages,
     setexp,
-    arduinoConnectedToSerial,
+    externalStates,
     handleShowSnackBar,
-    connectionEstablished,
     sender
   } = props;
   const classes = useStyles();
@@ -53,7 +52,11 @@ export const ChatInput = props => {
   const MAX_MESSAGE_LENGTH = 280;
 
   const submitText = event => {
-    if (arduinoConnectedToSerial && connectionEstablished && text) {
+    if (
+      externalStates.internalArduinoConnected &&
+      externalStates.externalArduinoConnected &&
+      text
+    ) {
       seterror(false);
       pyConnections.insertIntoDb(text, sender, Action.INSERT);
       pyConnections.getFromDb(Action.ENTRY, setmessages, messages);
@@ -72,10 +75,13 @@ export const ChatInput = props => {
   };
   const handleErrors = () => {
     seterror(true);
-    if (!arduinoConnectedToSerial) {
+    if (!externalStates.internalArduinoConnected) {
       handleShowSnackBar("No Device connected to USB!", "error");
     }
-    if (arduinoConnectedToSerial && !connectionEstablished) {
+    if (
+      externalStates.internalArduinoConnected &&
+      !externalStates.externalArduinoConnected
+    ) {
       handleShowSnackBar("Not connected to Chatpartner!", "error");
     }
     setTimeout(() => seterror(false), 4000);

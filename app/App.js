@@ -25,11 +25,13 @@ const App = () => {
    * STATE DECLARATIONS
    */
   const [messages, setmessages] = useState([]);
-  const [arduinoConnectedToSerial, setarduinoConnectedToSerial] = useState(
-    true
-  );
-  const [connectedChatPartner, setconnectedChatPartner] = useState(String);
-  const [connectionEstablished, setconnectionEstablished] = useState(true);
+  const [externalStates, setexternalStates] = useState({
+    internalArduinoConnected: true,
+    externalArduinoConnected: true,
+    newMessagesArrived: false,
+    chatPartnerUUID: String
+  });
+  //set initial states to false when implemented
   const [exp, setexp] = useState(String);
   const defaultStateSnackBar = {
     display: false,
@@ -93,18 +95,21 @@ const App = () => {
    * or connection to Chat Partner is established
    */
   useEffect(() => {
-    arduinoConnectedToSerial
+    externalStates.internalArduinoConnected
       ? handleShowSnackBar("Device connected to USB!", SnackBarStyle.SUCCESS)
       : handleShowSnackBar("No device connected to USB!", SnackBarStyle.ERROR);
 
-    arduinoConnectedToSerial &&
-      (connectionEstablished
+    externalStates.internalArduinoConnected &&
+      (externalStates.externalArduinoConnected
         ? handleShowSnackBar("Connected to Chatpartner", SnackBarStyle.SUCCESS)
         : handleShowSnackBar(
             "Not connected to Chatpartner!",
             SnackBarStyle.WARNING
           ));
-  }, [arduinoConnectedToSerial, connectionEstablished]);
+  }, [
+    externalStates.internalArduinoConnected,
+    externalStates.externalArduinoConnected
+  ]);
 
   return (
     <ThemeProvider theme={userTheme}>
@@ -126,13 +131,12 @@ const App = () => {
         }}
       >
         <AppHeader
-          arduinoConnectedToSerial={arduinoConnectedToSerial}
-          connectionEstablished={connectionEstablished}
+          externalStates={externalStates}
           userDefaults={userDefaults}
           setuserDefaults={setuserDefaults}
         />
         <ChatWindow
-          arduinoConnectedToSerial={arduinoConnectedToSerial}
+          externalStates={externalStates}
           messages={messages}
           setmessages={setmessages}
           exp={exp}
@@ -141,8 +145,7 @@ const App = () => {
         />
         <ChatInput
           sender={userDefaults.sender}
-          arduinoConnectedToSerial={arduinoConnectedToSerial}
-          connectionEstablished={connectionEstablished}
+          externalStates={externalStates}
           messages={messages}
           setmessages={setmessages}
           setexp={setexp}

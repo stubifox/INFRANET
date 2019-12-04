@@ -149,6 +149,31 @@ export const pyConnections = {
         `Python File userDefaultsHandler.py ended with code: ${code} and signal: ${signal}`
       );
     });
+  },
+
+  getExternalStateChanges: (
+    {
+      internalArduinoConnected,
+      externalArduinoConnected,
+      newMessagesArrived,
+      chatPartnerUUID
+    },
+    setExternalStates,
+    messages
+  ) => {
+    const pyShell = createPythonCon("transferFrontBack", "json");
+    pyShell.send({ id: messages.slice(-1).pop().id });
+
+    pyShell.on("message", updates => {
+      console.log(updates);
+    });
+
+    pyShell.end((err, code, signal) => {
+      if (err) throw err;
+      console.log(
+        `Python File updateExternalStates.py ended with code: ${code} and signal: ${signal}`
+      );
+    });
   }
 };
 

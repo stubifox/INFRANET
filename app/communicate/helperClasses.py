@@ -60,6 +60,15 @@ class DataBaseUtilities:
         connection.close()
         return result
 
+    @staticmethod
+    def getOneValueFromDb(sqlStatement, *sqlVariablesInOrder):
+        connection = DataBaseUtilities.dbConnection()
+        cursor = connection.cursor()
+        cursor.execute(sqlStatement, (*sqlVariablesInOrder,))
+        result = cursor.fetchone()
+        connection.close()
+        return result
+
 
 class UniversalUtilities:
     @staticmethod
