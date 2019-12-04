@@ -14,7 +14,7 @@ import {
   createReceivingData
 } from "./createDataObjects";
 import uuidv1 from "uuid";
-import { Action, printErrorOnConsoleIfOccurred } from "./shared";
+import { Action, printLoggingOrErrorMessages } from "./shared";
 
 /**
  * Object holding different Functions to communicate with Python Scripts.
@@ -42,7 +42,7 @@ export const pyConnections = {
     }
 
     pyShell.on("message", message => {
-      printErrorOnConsoleIfOccurred(message);
+      printLoggingOrErrorMessages(message);
 
       console.error(message);
     });
@@ -71,7 +71,7 @@ export const pyConnections = {
     }
 
     await pyShell.on("message", response => {
-      printErrorOnConsoleIfOccurred(response);
+      printLoggingOrErrorMessages(response);
       console.log(response);
 
       if (exp === Action.INITIAL) {
@@ -122,7 +122,7 @@ export const pyConnections = {
     }
 
     pyShell.on("message", message => {
-      printErrorOnConsoleIfOccurred(message);
+      printLoggingOrErrorMessages(message);
       console.log(message);
       /**
        * case: no data is held in the userDefaults in DB.
