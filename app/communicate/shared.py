@@ -36,3 +36,10 @@ class DictIndex(Enum):
     SHOULD_UPDATE_MESSAGES = 'shouldUpdateMessages'
     NEW_MESSAGES = 'newMessages'
     PARTNER_ID = 'partnerID'
+
+
+class RequestToken(Enum):
+    ARD_CON_STATE = 'ArdConState'
+    COMMUNICATION_STATE = 'CommunicationState'
+    __B_AUTH_KEY = b'PyToPyCom'
+    PARTNER_ID = 'PartnerID'

@@ -43,7 +43,6 @@ export const pyConnections = {
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
-
       console.error(message);
     });
 
@@ -100,7 +99,7 @@ export const pyConnections = {
    * @param {Action} exp an expression to say the func what to do
    */
 
-  userDefaultsHandler: ({ sender, userTheme }, setuserDefaults, exp) => {
+  userDefaultsHandler: async ({ sender, userTheme }, setuserDefaults, exp) => {
     const pyShell = createPythonCon("userDefaultsHandler", "json");
 
     /**
@@ -121,7 +120,7 @@ export const pyConnections = {
       pyShell.send(createDefaultsData(sender, userTheme, Action.INSERT));
     }
 
-    pyShell.on("message", message => {
+    await pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
       console.log(message);
       /**
@@ -151,7 +150,7 @@ export const pyConnections = {
     });
   },
 
-  getExternalStateChanges: (
+  getExternalStateChanges: async (
     {
       internalArduinoConnected,
       externalArduinoConnected,
@@ -171,7 +170,7 @@ export const pyConnections = {
       pyShell.send(createReceivingData(exp, messages.slice(-1).pop().id));
     }
 
-    pyShell.on("message", updates => {
+    await pyShell.on("message", updates => {
       printLoggingOrErrorMessages(updates);
       console.log(updates);
     });
