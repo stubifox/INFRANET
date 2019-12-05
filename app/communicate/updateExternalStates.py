@@ -25,15 +25,16 @@ def requestState():
         localArdState = str(conn.send('ArdConState'))
         # status, if an arduino is connected by infrared
         externalArdState = str(conn.send('CommunicationState'))
+        partnerID = str(conn.send('PartnerID'))
         conn.close()
-        return localArdState, externalArdState
+        return localArdState, externalArdState, partnerID
     except ConnectionError as e:
         UniversalUtilities.sendErrorMessageToFrontend(e)
 
 # function to verify if there are new messages since the last refresh of the frontend and to return these new Messages
 
 
-def databaseState(lastMessageId):
+def databaseState(lastMessageId, partnerID):
     sql = '''SELECT log.id
              FROM message_log AS log 
              ORDER BY log.id desc
@@ -50,9 +51,11 @@ def databaseState(lastMessageId):
                 FROM message_log AS log 
                 ORDER BY log.id desc
                 LIMIT ?
+                WHERE partner_id = ?
               ) ORDER BY id ASC
           '''
-        newData = DataBaseUtilities.getValuesFromDb(sql, counterNewMessages)
+        newData = DataBaseUtilities.getValuesFromDb(
+            sql, counterNewMessages, partnerID)
         return True, newData
     else:
         return False, None
@@ -60,9 +63,10 @@ def databaseState(lastMessageId):
 # build json for the frontend withe the arduino states and the new messages
 
 
-def jsonFrontEnd(ardLoc, ardExt, newMessagesInDb, messages):
+def jsonFrontEnd(ardLoc, ardExt, partnerID, newMessagesInDb, messages):
     print(json.dumps({DictIndex.LOCAL_ARDUINO_STATE.value: ardLoc,
                       DictIndex.EXTERNAL_ARDUINO_STATE.value: ardExt,
+                      DictIndex.PARTNER_ID: partnerID,
                       DictIndex.SHOULD_UPDATE_MESSAGES.value: newMessagesInDb,
                       DictIndex.NEW_MESSAGES.value: messages}))
 
@@ -77,17 +81,16 @@ def main():
     if exp == Action.INITIAL.value:
         try:
             ardLoc, ardExt = requestState()
-            jsonFrontEnd(ardLoc, ardExt, None, None)
+            jsonFrontEnd(ardLoc, ardExt, None, None, None)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
         # load all States except id
     elif exp == Action.ID.value:
         lastId = load[DictIndex.ID.value]
-        UniversalUtilities.sendInfoMessageToFrontend(lastId)
         try:
-            newMessagesInDb, messages = databaseState(lastId)
-            ardLoc, ardExt = requestState()
-            jsonFrontEnd(ardLoc, ardExt, newMessagesInDb, messages)
+            ardLoc, ardExt, partnerID = requestState()
+            newMessagesInDb, messages = databaseState(lastId, partnerID)
+            jsonFrontEnd(ardLoc, ardExt, partnerID, newMessagesInDb, messages)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
         except sqlite3.Error as e:

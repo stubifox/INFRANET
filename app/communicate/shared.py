@@ -35,3 +35,4 @@ class DictIndex(Enum):
     EXTERNAL_ARDUINO_STATE = 'externalArduinoState'
     SHOULD_UPDATE_MESSAGES = 'shouldUpdateMessages'
     NEW_MESSAGES = 'newMessages'
+    PARTNER_ID = 'partnerID'

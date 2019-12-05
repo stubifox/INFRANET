@@ -13,7 +13,8 @@ export const Action = {
   LOCAL_ARDUINO_STATE: "localArduinoState",
   EXTERNAL_ARDUINO_STATE: "externalArduinoState",
   SHOULD_UPDATE_MESSAGES: "shouldUpdateMessages",
-  NEW_MESSAGES: "newMessages"
+  NEW_MESSAGES: "newMessages",
+  PARTNER_ID: "partnerID"
 };
 
 export const SnackBarStyle = {
