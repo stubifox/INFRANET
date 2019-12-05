@@ -3,8 +3,6 @@ from cryptography.fernet import Fernet, InvalidToken
 from hashlib import blake2b
 import json
 import sqlite3
-import getFromDb
-import dataBaseConnection
 import jsonpickle
 import base64
 from helperClasses import DataBaseUtilities, UniversalUtilities
@@ -22,13 +20,13 @@ class EncryptionHandler:
         self._insertKeyHandlerIntoDb(keyHandler)
 
     def encryptString(self, stringToEncrypt):
-        '''TReturns void if the encryption fails'''
+        '''Returns void if the encryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=32)
         try:
             blake.update(keyHandler.shared_key.encode())
             fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
-            return fernet.encrypt(json.dumps(stringToEncrypt).encode())
+            return fernet.encrypt(stringToEncrypt.encode())
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
@@ -43,7 +41,7 @@ class EncryptionHandler:
         try:
             blake.update(keyHandler.shared_key.encode())
             fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
-            return json.loads(fernet.decrypt(encryptedByteArray))
+            return fernet.decrypt(encryptedByteArray)
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
@@ -53,12 +51,10 @@ class EncryptionHandler:
 
     def getLocalPublicKey(self):
         '''Returns the local public_key as string'''
-        keyHandler = self._getKeyHandlerFromDb()
+        keyHandler = self._createAndSaveEncryptionKeys()
         return str(keyHandler.public_key)
 
     def _createAndSaveEncryptionKeys(self):
-        # needs to be called always on startup of new connection so
-        # probably call it in getLocalPublicKey (how often does it get called?)
         keyHandler = DiffieHellman(group=5)
         keyHandler.generate_public_key()
         self._insertKeyHandlerIntoDb(keyHandler)
