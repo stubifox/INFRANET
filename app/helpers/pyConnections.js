@@ -159,12 +159,20 @@ export const pyConnections = {
       chatPartnerUUID
     },
     setExternalStates,
-    messages
+    messages,
+    exp
   ) => {
-    const pyShell = createPythonCon("transferFrontBack", "json");
-    pyShell.send({ id: messages.slice(-1).pop().id });
+    const pyShell = createPythonCon("updateExternalStates", "json");
+    if (exp === Action.INITIAL) {
+      pyShell.send(createReceivingData(exp, undefined));
+      console.log(messages.length, undefined);
+    }
+    if (exp === Action.ID) {
+      pyShell.send(createReceivingData(exp, messages.slice(-1).pop().id));
+    }
 
     pyShell.on("message", updates => {
+      printLoggingOrErrorMessages(updates);
       console.log(updates);
     });
 

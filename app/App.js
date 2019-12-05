@@ -79,6 +79,14 @@ const App = () => {
     );
   }, [userDefaults.userTheme]);
 
+  if (messages.length > 0) {
+    pyConnections.getExternalStateChanges(
+      externalStates,
+      setexternalStates,
+      messages,
+      Action.ID
+    );
+  }
   /**
    * on initial App load look if user has any Defaults declared, look up uuid(sender)
    */
@@ -89,6 +97,15 @@ const App = () => {
       Action.INITIAL
     );
   }, []);
+
+  useEffect(() => {
+    pyConnections.getExternalStateChanges(
+      externalStates,
+      setexternalStates,
+      messages,
+      Action.INITIAL
+    );
+  }, [messages]);
 
   /**
    * display SnackBars when connection to either Device on USB is established
