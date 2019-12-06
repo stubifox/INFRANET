@@ -70,22 +70,16 @@ const App = () => {
 
   const askForStates_600 = () => {
     setInterval(
-      pyConnections.getExternalStateChanges(
-        externalStates,
-        setexternalStates,
-        messages,
-        Action.INITIAL
-      ),
+      () =>
+        pyConnections.getExternalStateChanges(
+          externalStates,
+          setexternalStates,
+          messages,
+          Action.INITIAL
+        ),
       600
     );
   };
-  /**
-   * on User Theme Change: insert new Preference to DB
-   */
-
-  /**
-   * on initial App load look if user has any Defaults declared, look up uuid(sender)
-   */
 
   useEffect(() => {
     pyConnections.insertIntoDb("", "", Action.INITIAL);

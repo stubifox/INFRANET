@@ -26,6 +26,7 @@ def requestState():
         # status, if an arduino is connected by infrared
         externalArdState = str(conn.send('CommunicationState'))
         partnerID = str(conn.send('PartnerID'))
+        conn.send('finished')
         conn.close()
         return localArdState, externalArdState, partnerID
     except ConnectionError as e:
@@ -80,11 +81,10 @@ def main():
 
     if exp == Action.INITIAL.value:
         try:
-            ardLoc, ardExt = requestState()
+            ardLoc, ardExt, _ = requestState()
             jsonFrontEnd(ardLoc, ardExt, None, None, None)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
-        # load all States except id
     elif exp == Action.ID.value:
         lastId = load[DictIndex.ID.value]
         try:
