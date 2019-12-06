@@ -4,3 +4,8 @@ venv
 .vscode
 __pycache__
 *Session.sql
+Log
+infranet-linux-arm64
+infranet-win32-x64
+infranet-linux-arm64.rar
+infranet-win32-x64.rar
