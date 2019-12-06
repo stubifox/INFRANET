@@ -68,27 +68,48 @@ const App = () => {
     }
   });
 
-  /**
-   * on User Theme Change: insert new Preference to DB
-   */
-  useEffect(() => {
-    pyConnections.userDefaultsHandler(
-      userDefaults,
-      setuserDefaults,
-      Action.UPDATE_THEME
+  const askForStates_600 = () => {
+    setInterval(
+      () =>
+        pyConnections.getExternalStateChanges(
+          externalStates,
+          setexternalStates,
+          messages,
+          Action.INITIAL
+        ),
+      600
     );
-  }, [userDefaults.userTheme]);
+  };
 
-  /**
-   * on initial App load look if user has any Defaults declared, look up uuid(sender)
-   */
   useEffect(() => {
+    pyConnections.insertIntoDb("", "", Action.INITIAL);
     pyConnections.userDefaultsHandler(
       userDefaults,
       setuserDefaults,
       Action.INITIAL
     );
+    //remove when states are there!!
+    pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
+    setexp(Action.INITIAL);
   }, []);
+
+  //calling every 600ms
+  useEffect(() => {
+    askForStates_600();
+    return () => {
+      clearInterval(askForStates_600);
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   if (
+  //     externalStates.internalArduinoConnected &&
+  //     externalStates.internalArduinoConnected
+  //   ) {
+  //     pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
+  //     setexp(Action.INITIAL);
+  //   }
+  // }, [userDefaults.sender]);
 
   /**
    * display SnackBars when connection to either Device on USB is established
@@ -110,6 +131,14 @@ const App = () => {
     externalStates.internalArduinoConnected,
     externalStates.externalArduinoConnected
   ]);
+
+  useEffect(() => {
+    pyConnections.userDefaultsHandler(
+      userDefaults,
+      setuserDefaults,
+      Action.UPDATE_THEME
+    );
+  }, [userDefaults.userTheme]);
 
   return (
     <ThemeProvider theme={userTheme}>

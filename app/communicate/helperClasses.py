@@ -9,9 +9,10 @@
 import os.path as path
 import json
 import sqlite3
-from shared import DictIndex
+from shared import DictIndex, RequestToken
 import sys
 from inspect import getframeinfo, stack
+from multiprocessing.connection import Client
 
 
 class DataBaseUtilities:
@@ -69,6 +70,12 @@ class DataBaseUtilities:
         connection.close()
         return result
 
+    @staticmethod
+    def insertMessageAndSender(sender, message):
+        sql = '''INSERT INTO message_log (sender, time, date, message)
+            VALUES(?, time('now', 'localtime'), date('now'), ?)'''
+        DataBaseUtilities.insertIntoDb(sql, sender, message)
+
 
 class UniversalUtilities:
     @staticmethod
@@ -88,3 +95,10 @@ class UniversalUtilities:
         caller = getframeinfo(stack()[1][0])
         print(json.dumps({DictIndex.INFO.value:  "in File {}:{}, message: {}".format(
             caller.filename, caller.lineno, str(infoMessage))}))
+
+    @staticmethod
+    def connectAndSendTo_6200(message):
+        address = ('localhost', 6200)
+        conn = Client(address, authkey=RequestToken.__B_AUTH_KEY.value)
+        conn.send(message)
+        conn.close()

@@ -43,7 +43,6 @@ export const pyConnections = {
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
-
       console.error(message);
     });
 
@@ -62,7 +61,7 @@ export const pyConnections = {
    * @param {'React.state'} messages the corresponding state to the state Function
    */
 
-  getFromDb: async (exp, setmessages, messages) => {
+  getFromDb: (exp, setmessages, messages) => {
     const pyShell = createPythonCon("getFromDb", "json");
     if (exp === Action.LOAD_MORE) {
       pyShell.send(createReceivingData(exp, messages[0].id));
@@ -70,7 +69,7 @@ export const pyConnections = {
       pyShell.send(createReceivingData(exp, ""));
     }
 
-    await pyShell.on("message", response => {
+    pyShell.on("message", response => {
       printLoggingOrErrorMessages(response);
       console.log(response);
 
@@ -100,7 +99,7 @@ export const pyConnections = {
    * @param {Action} exp an expression to say the func what to do
    */
 
-  userDefaultsHandler: ({ sender, userTheme }, setuserDefaults, exp) => {
+  userDefaultsHandler: ({ userTheme }, setuserDefaults, exp) => {
     const pyShell = createPythonCon("userDefaultsHandler", "json");
 
     /**
@@ -108,34 +107,18 @@ export const pyConnections = {
      * if so Python File will return the data.
      */
     if (exp === Action.INITIAL) {
-      pyShell.send(createDefaultsData("", "", Action.CHECK));
-    }
-
-    if (exp === Action.INSERT_UUID) {
-      const uuid = uuidv1();
-      setuserDefaults({ sender: uuid, userTheme: userTheme });
-      pyShell.send(createDefaultsData(uuid, userTheme, Action.INSERT));
+      pyShell.send(createDefaultsData(userTheme, Action.CHECK));
     }
 
     if (exp === Action.UPDATE_THEME) {
-      pyShell.send(createDefaultsData(sender, userTheme, Action.INSERT));
+      pyShell.send(createDefaultsData(userTheme, exp));
     }
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
       console.log(message);
-      /**
-       * case: no data is held in the userDefaults in DB.
-       * Recursively calling this Function again when no data provided
-       * with exp insertUUID to insert into DB and create a uuid.
-       */
-      if (message.length === 0) {
-        pyConnections.userDefaultsHandler(
-          { sender: sender, userTheme: userTheme },
-          setuserDefaults,
-          Action.INSERT_UUID
-        );
-      } else if (exp === Action.INITIAL) {
+
+      if (exp === Action.INITIAL) {
         setuserDefaults({
           sender: message[0].value,
           userTheme: message[1].value === "True"
@@ -159,12 +142,20 @@ export const pyConnections = {
       chatPartnerUUID
     },
     setExternalStates,
-    messages
+    messages,
+    exp
   ) => {
-    const pyShell = createPythonCon("transferFrontBack", "json");
-    pyShell.send({ id: messages.slice(-1).pop().id });
+    const pyShell = createPythonCon("updateExternalStates", "json");
+    if (exp === Action.INITIAL) {
+      pyShell.send(createReceivingData(exp, undefined));
+      console.log(messages.length, undefined);
+    }
+    if (exp === Action.ID) {
+      pyShell.send(createReceivingData(exp, messages.slice(-1).pop().id));
+    }
 
     pyShell.on("message", updates => {
+      printLoggingOrErrorMessages(updates);
       console.log(updates);
     });
 

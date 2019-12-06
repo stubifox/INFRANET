@@ -26,15 +26,10 @@ export const ChatWindow = props => {
    *
    */
   useEffect(() => {
-    if (externalStates.internalArduinoConnected) {
-      pyConnections.insertIntoDb("", "", Action.INITIAL);
-      pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
-      setexp(Action.INITIAL);
-    }
     if (exp !== Action.LOAD_MORE) {
       scrollToBottom();
     }
-  }, []);
+  });
 
   useEffect(() => {
     if (exp !== Action.LOAD_MORE) {

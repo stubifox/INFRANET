@@ -1,4 +1,4 @@
-from arduinoConection import ArduinoConection
+from ArduinoConection import ArduinoConection
 
 from threading import Thread
 from multiprocessing.connection import Listener
