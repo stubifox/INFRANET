@@ -10,7 +10,7 @@ import time
 
 def serDuplexRead(ardCon):
     while(True):
-        readInput = str.decode(ardCon.readline())
+        readInput = ardCon.readline()
         # filter
         if readInput in ('', '\n'):
             continue
