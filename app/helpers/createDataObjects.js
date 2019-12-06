@@ -23,13 +23,11 @@ const createReceivingData = (exp, id) => ({
 });
 
 /**
- * @param {'uuid'} uuid the identifier to append to the obj
  * @param {boolean} userTheme the specified user theme to append to the obj
  * @param {string} exp expression append to obj
  * @returns {'object'}  a object for communication with python.
  */
-const createDefaultsData = (uuid, userTheme, exp) => ({
-  uuid: uuid,
+const createDefaultsData = (userTheme, exp) => ({
   theme: userTheme,
   load: exp
 });

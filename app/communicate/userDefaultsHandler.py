@@ -11,33 +11,49 @@ import getFromDb
 import dataBaseConnection as dbCon
 from shared import Action, DictIndex
 from helperClasses import DataBaseUtilities, UniversalUtilities
+import uuid as guid
 
 
-def getDefaultsFromSettingsTable():
-    sql = '''SELECT * FROM settings'''
-    DataBaseUtilities.sendDataToFrontendFromDb(sqlStatement=sql)
+def getUUIDFromSettings():
+    sql = '''SELECT value FROM settings WHERE key='uuid' '''
+    return DataBaseUtilities.getOneValueFromDb(sqlStatement=sql)
+
+
+def getThemeFromSettings():
+    sql = '''SELECT value FROM settings WHERE key='theme' '''
+    return DataBaseUtilities.getOneValueFromDb(sqlStatement=sql)
 
 
 def insertDefaults(uuid, theme):
     sqlInsert = '''INSERT OR REPLACE INTO settings (key, value)
         VALUES('uuid', ?), ('theme', ?)'''
-    DataBaseUtilities.insertIntoDb(sqlInsert, uuid, str(theme))
+    DataBaseUtilities.insertIntoDb(sqlInsert, str(uuid), str(theme))
+
+
+def insertThemeOnly(theme):
+    sqlInsert = '''INSERT OR REPLACE INTO settings (key, value)
+        VALUES('theme', ?)'''
+    DataBaseUtilities.insertIntoDb(sqlInsert, str(theme))
+
+
+def sendDefaults():
+    sql = '''SELECT * FROM settings'''
+    DataBaseUtilities.sendDataToFrontendFromDb(sqlStatement=sql)
 
 
 def main():
-    try:
-        inputData = dbCon.read_in_stdin()
-        if inputData[DictIndex.LOAD.value] == Action.CHECK.value:
-            getDefaultsFromSettingsTable()
-
-        if inputData[DictIndex.LOAD.value] == Action.INSERT.value:
-            uuid, theme = inputData[DictIndex.UUID.value], inputData[DictIndex.THEME.value]
-            insertDefaults(uuid=uuid, theme=theme)
-            getDefaultsFromSettingsTable()
-    except Exception as e:
-        pass
-
-    return
+    # try:
+    inputData = UniversalUtilities.read_in_stdin_json()
+    theme = inputData[DictIndex.THEME.value]
+    if inputData[DictIndex.LOAD.value] == Action.CHECK.value:
+        settings_uuid = getUUIDFromSettings()
+        if settings_uuid == None:
+            insertDefaults(uuid=guid.uuid4(), theme=theme)
+        sendDefaults()
+    if inputData[DictIndex.LOAD.value] == Action.UPDATE_THEME.value:
+        insertThemeOnly(theme=theme)
+    # except Exception as e:
+    #     UniversalUtilities.sendErrorMessageToFrontend(e)
 
 
 if __name__ == "__main__":

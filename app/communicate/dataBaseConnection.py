@@ -47,14 +47,13 @@ def main():
     if data[DictIndex.LOAD.value] == Action.INITIAL.value:
         createDataBase()
         createSettingsTable()
-        return
     elif data[DictIndex.LOAD.value] == Action.INSERT.value:
         message, sender = data[DictIndex.MESSAGE.value], data[DictIndex.SENDER.value]
         insertMessageAndSender(sender=sender, message=message)
-        try:
-            UniversalUtilities.connectAndSendTo_6200(message=message)
-        except ConnectionError as e:
-            UniversalUtilities.sendErrorMessageToFrontend(e)
+        # try:
+        #     UniversalUtilities.connectAndSendTo_6200(message=message)
+        # except ConnectionError as e:
+        #     UniversalUtilities.sendErrorMessageToFrontend(e)
 
 
 if __name__ == '__main__':
