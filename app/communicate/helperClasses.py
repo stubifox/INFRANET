@@ -70,6 +70,12 @@ class DataBaseUtilities:
         connection.close()
         return result
 
+    @staticmethod
+    def insertMessageAndSender(sender, message):
+        sql = '''INSERT INTO message_log (sender, time, date, message)
+            VALUES(?, time('now', 'localtime'), date('now'), ?)'''
+        DataBaseUtilities.insertIntoDb(sql, sender, message)
+
 
 class UniversalUtilities:
     @staticmethod
