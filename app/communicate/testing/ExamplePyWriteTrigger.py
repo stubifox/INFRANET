@@ -1,6 +1,6 @@
 from multiprocessing.connection import Client
 import time
-message = 'CommunicationState'
+message = 'PartnerID'
 
 
 def send():
@@ -8,14 +8,20 @@ def send():
     conn = Client(address, authkey=b'PyToPyCom')
     conn.send(message)
     print(conn.recv())
+    conn.send('ArdConState')
+    print(conn.recv())
+    conn.send('CommunicationState')
+    print(conn.recv())
+    conn.send('finstuffwhat')
     conn.close()
 
 
 def main():
+    print("starting")
     for i in range(1, 20):
         print("send {}.message".format(i))
         send()
-        time.sleep(1)
+        time.sleep(0.001)
 
 
 if __name__ == '__main__':

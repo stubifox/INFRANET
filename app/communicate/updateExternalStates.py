@@ -13,7 +13,7 @@ import os
 import json
 from multiprocessing.connection import Client
 from helperClasses import DataBaseUtilities, UniversalUtilities
-from shared import DictIndex, Action
+from shared import DictIndex, Action, RequestToken
 
 
 # fuction for requesting the arduino state from an port 6000
@@ -22,10 +22,13 @@ def requestState():
         address = ('localhost', 6000)
         conn = Client(address, authkey=b'PyToPyCom')
         # status, if an local arduino is connected
-        localArdState = str(conn.send('ArdConState'))
+        conn.send(RequestToken.ARD_CON_STATE.value)
+        localArdState = str(conn.recv())
         # status, if an arduino is connected by infrared
-        externalArdState = str(conn.send('CommunicationState'))
-        partnerID = str(conn.send('PartnerID'))
+        conn.send(RequestToken.COMMUNICATION_STATE.value)
+        externalArdState = str(conn.recv())
+        conn.send(RequestToken.PARTNER_ID.value)
+        partnerID = str(conn.recv())
         conn.send('finished')
         conn.close()
         return localArdState, externalArdState, partnerID
@@ -67,7 +70,7 @@ def databaseState(lastMessageId, partnerID):
 def jsonFrontEnd(ardLoc, ardExt, partnerID, newMessagesInDb, messages):
     print(json.dumps({DictIndex.LOCAL_ARDUINO_STATE.value: ardLoc,
                       DictIndex.EXTERNAL_ARDUINO_STATE.value: ardExt,
-                      DictIndex.PARTNER_ID: partnerID,
+                      DictIndex.PARTNER_ID.value: partnerID,
                       DictIndex.SHOULD_UPDATE_MESSAGES.value: newMessagesInDb,
                       DictIndex.NEW_MESSAGES.value: messages}))
 
@@ -81,8 +84,8 @@ def main():
 
     if exp == Action.INITIAL.value:
         try:
-            ardLoc, ardExt, _ = requestState()
-            jsonFrontEnd(ardLoc, ardExt, None, None, None)
+            ardLoc, ardExt, partnerID = requestState()
+            jsonFrontEnd(ardLoc, ardExt, partnerID, None, None)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
     elif exp == Action.ID.value:

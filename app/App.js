@@ -101,6 +101,27 @@ const App = () => {
     };
   }, []);
 
+  const askForStatesWithID = () => {
+    setInterval(
+      () =>
+        pyConnections.getExternalStateChanges(
+          externalStates,
+          setexternalStates,
+          messages,
+          Action.ID
+        ),
+      600
+    );
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      clearInterval(askForStates_600);
+      askForStatesWithID();
+    }
+    return () => clearInterval(askForStatesWithID)
+  }, [])
+
   // useEffect(() => {
   //   if (
   //     externalStates.internalArduinoConnected &&
@@ -124,9 +145,9 @@ const App = () => {
       (externalStates.externalArduinoConnected
         ? handleShowSnackBar("Connected to Chatpartner", SnackBarStyle.SUCCESS)
         : handleShowSnackBar(
-            "Not connected to Chatpartner!",
-            SnackBarStyle.WARNING
-          ));
+          "Not connected to Chatpartner!",
+          SnackBarStyle.WARNING
+        ));
   }, [
     externalStates.internalArduinoConnected,
     externalStates.externalArduinoConnected

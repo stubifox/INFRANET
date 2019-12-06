@@ -1,6 +1,8 @@
 from multiprocessing.connection import Listener
 
-while True:
+print("starting")
+
+for i in range(1, 20):
     print("listen on port 6000")
     address = ('localhost', 6000)
     listener = Listener(address, authkey=b'PyToPyCom')
@@ -17,5 +19,7 @@ while True:
         else:
             con.close()
             break
+        # con.close()
+        # break
     print("connection closed")
     listener.close()
