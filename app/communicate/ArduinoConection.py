@@ -1,9 +1,11 @@
 import serial
 import time
+import json
 import serial.tools.list_ports
 from threading import Thread
-from app.communicate.encryptionHandler import EncryptionHandler
-from app.communicate.helperClasses import DataBaseUtilities
+from userDefaultsHandler import getUUIDFromSettings
+from encryptionHandler import EncryptionHandler
+from helperClasses import DataBaseUtilities
 
 # capsulates the communication to the Arduino using a Serial Com-Port connection
 
@@ -16,26 +18,27 @@ class ArduinoConection:
         except serial.SerialTimeoutException:
             # TODO reset arduino connection
             self.__serCon = None
-        except:
+        except Exception as e:
             # TODO logging
-            print("unknown error")
+            print("error from write:")
+            print (e)
 
     def readline(self):
         msg = ""
-        try:
-            msg = self.__serCon.readline()
-        except serial.SerialTimeoutException:
+        #try:
+        msg = self.__serCon.readline()
+        #except serial.SerialTimeoutException:
             # TODO reset arduino connection
-            self.__serCon = None
-        except:
+            #self.__serCon = None
+        #except:
             # TODO Logging
-            print("unknown error")
+            #print("error from read")
         return msg
 
     # returns wether a arduino ist connected to the host or not
     def getArdConState(self):
         # if no connection or error in connection
-        if ((self.__serCon == None)):
+        if (self.__serCon == None):
             # try to get a new connection
             if (self.SearchArdThread.is_alive() == False):
                 self.SearchArdThread = Thread(
@@ -54,6 +57,9 @@ class ArduinoConection:
     def getArdComState(self):
         # TODO More logic if needed
         return self.__conToArd
+    
+    def resetArdCon(self):
+        self.__serCon = None
 
     def __startComListener(self):
         # TODO Implement the listener if the arduino finds a com partner
@@ -69,40 +75,43 @@ class ArduinoConection:
             if(str(port).__contains__("Arduino") == False):
                 continue
             # also tests if correct software on arduino
-            try:
+            #try:
                 # Handshake Process
-                testCon = serial.Serial(
-                    port=port.device, baudrate=115200, timeout=2, write_timeout=2)
+            testCon = serial.Serial(
+                port=port.device, baudrate=115200, timeout=2, write_timeout=2)
                 # on each new connection the arduino will restart, waiting for it
-                time.sleep(2)
-                testCon.write(str.encode("~echo~\n"))
-                answer = testCon.readline()
-                if (answer == str.encode("~ping~\n")):
+            time.sleep(2)
+            testCon.write(str.encode("~echo~\n"))
+            answer = testCon.readline()
+            if (answer == str.encode("~ping~\n")):
                     # searching successfull
                     # set guid
                     # wait for response -> check if guid was correctly recieved
-                    testCon.write(str.encode(str(self.__localId) + "\n"))
-                    answer = testCon.readline()
-                    if (answer != str.encode("~okay~\n")):
+                testCon.write(str.encode(str(self.__localId) + "\n"))
+                answer = testCon.readline()
+                if (answer != str.encode("~okay~\n")):
                         # TODO log handshake failed
-                        print("handshake failed")
-                        self.__serCon = None
-                        continue
-                    else:
+                    print("handshake failed")
+                    self.__serCon = None
+                    continue
+                else:
                         # handshake successfull
-                        self.__serCon = testCon
-                        break
-            except:
+                    self.__serCon = testCon
+                    break
+            #except:
                 # TODO Log Fail
-                print("error connecting to serialport: {}".format(port.device))
-        # return FoundConnection
+                #print("error connecting to serialport: {}".format(port.device))
+        return
+    def IsSerCon(self):
+        return self.__serCon != None
 
-    def __init__(self, localId):
-        self.__localId = localId
+    def __init__(self):
+        self.__localId = json.loads(json.dumps(getUUIDFromSettings()))['value']
+        print(self.__localId)
         self.__partnerId = None
         self.__serCon = None
         self.SearchArdThread = Thread()
         self.getArdConState()
-        if (self.getArdConState()):
-            self.__startComListener()
+        #if (self.getArdConState()):
+        #    self.__startComListener()
         self.__conToArd = False

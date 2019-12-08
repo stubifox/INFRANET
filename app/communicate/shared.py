@@ -41,5 +41,5 @@ class DictIndex(Enum):
 class RequestToken(Enum):
     ARD_CON_STATE = 'ArdConState'
     COMMUNICATION_STATE = 'CommunicationState'
-    __B_AUTH_KEY = b'PyToPyCom'
+    __B_AUTH_KEY = 'PyToPyCom'
     PARTNER_ID = 'PartnerID'

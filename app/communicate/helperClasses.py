@@ -99,6 +99,6 @@ class UniversalUtilities:
     @staticmethod
     def connectAndSendTo_6200(message):
         address = ('localhost', 6200)
-        conn = Client(address, authkey=RequestToken.__B_AUTH_KEY.value)
+        conn = Client(address, authkey=b'PyToPyCom')
         conn.send(message)
         conn.close()

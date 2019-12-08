@@ -8,6 +8,7 @@
 #define BIT_DATA_L 4
 #define BIT_HANDSHAKE 5
 #define BIT_DATA 6
+#define GuidLength 36
 
 //own defines
 int Arraylength;
@@ -19,6 +20,27 @@ const int pinRecv = 2;
 
 unsigned char SendRecBuffer[MaxMsgSize];
 
+bool ConToHost;
+unsigned char HostGuid[GuidLength];
+unsigned char GuestGuid[GuidLength];
+int InitStep;
+
+void GetHostGuid()
+{
+    char GotGuidMsg[] = "~okay~\n";
+
+    // save the Guid from Host
+    for (int i = 0; i < GuidLength; i++)
+    {
+        HostGuid[i] = SendRecBuffer[i];
+    }
+
+    // confirm got guid
+    Serial.write(GotGuidMsg);
+    ConToHost = true;
+    InitStep = 2;
+}
+
 // clearing the SendRecieve Buffer
 void ClearSendRecBuffer()
 {
@@ -28,6 +50,27 @@ void ClearSendRecBuffer()
   {
     SendRecBuffer[i] = '\n';
   }
+}
+
+void CheckForHostInit()
+{
+    char PingInput[] = "~echo~\n";
+    char PingOutput[] = "~ping~\n";
+
+    // wait for correct Ping input request
+    for (int i = 0; i < 5; i++)
+    {
+        if (SendRecBuffer[i] != PingInput[i])
+        {
+          ConToHost = false;
+          return;
+        }
+    }
+
+    // answer with correct ping output
+    Serial.write(PingOutput);
+    // getting ready for next step
+    InitStep = 1;
 }
 
 void FlagsInit()
@@ -59,7 +102,7 @@ void SerSend()
 // Recieve Information from host-computer using serial and save it to the buffer
 void SerRecieve()
 {
-  int i = BIT_DATA;
+  int i = (ConToHost)?BIT_DATA:0;
   while (Serial.available() && i < MaxMsgSize)
   {
     SendRecBuffer[i] = Serial.read();
@@ -70,7 +113,7 @@ void SerRecieve()
       delay(2);
   }
   Arraylength = i;  
-  FlagsInit();
+  if (ConToHost != false)FlagsInit();
 }
 
 void IRSend()
@@ -116,19 +159,48 @@ void IRReceive()
 
 void setup()
 {
-  Arraylength =0;
   Serial.begin(115200);
-  IR.Init(pinRecv);
   ClearSendRecBuffer();
+
+  ConToHost = false;
+  InitStep = 0;
+  for (int i = 0; i < GuidLength; i++)
+  {
+      HostGuid[i] = '+';
+      GuestGuid[i] = '-';
+  }
+  Arraylength =0;
+  IR.Init(pinRecv);
 }
 
 void loop()
 {
-  //the real chat loop 
-  SerRecieve();
-  IRSend();  
-  ClearSendRecBuffer();
-  IRReceive();
-  SerSend();
-  ClearSendRecBuffer();
+  if (ConToHost == false)
+  {    
+    if (Serial.available())
+    {
+      SerRecieve();
+      switch (InitStep)
+      {
+        case 0:
+          CheckForHostInit();
+          break;
+        case 1:
+          GetHostGuid();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  else
+  {    
+    //the real chat loop 
+    SerRecieve();
+    IRSend();  
+    ClearSendRecBuffer();
+    IRReceive();
+    SerSend();
+    ClearSendRecBuffer();
+  }
 }
