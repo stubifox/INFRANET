@@ -48,7 +48,6 @@ void setup()
     Serial.println("init over");
 }
 
-unsigned char dta[52];
 
 void loop()
 {

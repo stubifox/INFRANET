@@ -78,7 +78,7 @@ void IRSend()
   //IR.EnableIROut(ir_freq);
   if (SendRecBuffer[BIT_DATA] == '\n') return;
   IR.ImpSend(SendRecBuffer, 38);
-  delay(1000);
+  //delay(1000);
   IR.ClearNew();
   IR.EnableIRIn();
 }
@@ -124,6 +124,7 @@ void setup()
 
 void loop()
 {
+  //the real chat loop 
   SerRecieve();
   IRSend();  
   ClearSendRecBuffer();
