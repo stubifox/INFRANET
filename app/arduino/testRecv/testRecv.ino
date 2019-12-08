@@ -54,6 +54,11 @@ void loop()
 {
     if(IR.ready)                  // get IR data
     {
+    if ((IR.start_l < 50 && IR.start_h > 0) || (IR.start_h < 50 && IR.start_h > 0) || IR.MessageCharCount == 0)
+    {
+      IR.ClearNew();
+      return;
+    }
     Serial.println("other:");
         Serial.print("start_l: ");Serial.print(IR.start_l);
         Serial.write('\n');

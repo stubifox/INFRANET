@@ -124,7 +124,7 @@ void IRSendRev::Init()
   start_h = 0;
   start_l = 0;
   first = 0;
-  ready = 0;
+  ready = false;
   delay(20);
   ClearNew();
 }
@@ -224,8 +224,8 @@ ISR(TIMER_INTR_NAME)
   if (IR.MessageCharCount >= MaxMsgSize)
   {
     // Buffer overflow
-    IR.ready = true;
-    irparams.rcvstate = STATE_STOP;
+    IR.ValidateOrThrowInput();
+    //irparams.rcvstate = STATE_STOP;
   }
   switch (irparams.rcvstate)
   {
@@ -283,7 +283,7 @@ ISR(TIMER_INTR_NAME)
         // Mark current code as ready for processing
         // Switch to STOP
         // Don't reset timer; keep counting space width
-        IR.ready = true;
+        IR.ValidateOrThrowInput();
         irparams.rcvstate = STATE_STOP;
       }
     }
@@ -432,6 +432,8 @@ void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
   unsigned int nlong = idata[D_LONG];
   unsigned char datalen = idata[D_DATALEN]; //need to manually set this
 
+  int realDatalen = (datalen == 0) ? MaxMsgSize : datalen;
+
 #if __DEBUG
   Serial.println("begin to send ir:\r\n");
   Serial.print("ifreq = ");
@@ -447,7 +449,7 @@ void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
   Serial.print("nlong = ");
   Serial.println(nlong);
   Serial.print("datalen = ");
-  Serial.println(datalen);
+  Serial.println(realDatalen);
 #endif
 
   bool toggle = false;
@@ -461,7 +463,7 @@ void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
   ImpSendRaw(start_low, toggleFlag);
   // send data:
 
-  for (int i = 0; i < datalen; i++)
+  for (int i = /*D_DATA*/ 0; i < realDatalen; i++)
   {
     for (int j = 0; j < 8; j++)
     {
@@ -483,6 +485,12 @@ void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
   ImpSendRaw(nshort, toggleFlag);
 
   space(0); //they said "Just to be sure" yeah, why not
+}
+
+void IRSendRev::ValidateOrThrowInput()
+{
+  // maybe filterig here could be possible but doing it in the main ard script is easier
+  ready = true;
 }
 
 void IRSendRev::Send(unsigned char *idata, unsigned char ifreq)

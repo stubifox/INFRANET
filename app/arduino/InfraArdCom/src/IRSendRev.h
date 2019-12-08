@@ -70,6 +70,7 @@ public:
     void Init(int revPin); // init
     void Init();
     void ClearNew();
+    void ValidateOrThrowInput();
     unsigned char Recv(unsigned char *revData); //
     unsigned char IsDta();                      // if IR get data
     //void Clear();                               // clear IR data
