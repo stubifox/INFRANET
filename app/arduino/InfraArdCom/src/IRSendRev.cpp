@@ -17,7 +17,6 @@
  * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
  */
 
-
 #include "IRSendRev.h"
 #include "IRSendRevInt.h"
 
@@ -28,20 +27,24 @@ volatile irparams_t irparams;
 
 void IRSendRev::sendRaw(unsigned int buf[], int len, int hz)
 {
-	enableIROut(hz);
+  enableIROut(hz);
 
-  for (int i = 0; i < len; i++) {
-    if (i & 1) {
+  for (int i = 0; i < len; i++)
+  {
+    if (i & 1)
+    {
       space(buf[i]);
-    } 
-    else {
+    }
+    else
+    {
       mark(buf[i]);
     }
   }
   space(0); // Just to be sure
 }
 
-void IRSendRev::mark(int time) {
+void IRSendRev::mark(int time)
+{
   // Sends an IR mark for the specified number of microseconds.
   // The mark output is modulated at the PWM frequency.
   TIMER_ENABLE_PWM; // Enable pin 3 PWM output
@@ -49,14 +52,16 @@ void IRSendRev::mark(int time) {
 }
 
 /* Leave pin off for time (given in microseconds) */
-void IRSendRev::space(int time) {
+void IRSendRev::space(int time)
+{
   // Sends an IR space for the specified number of microseconds.
   // A space is no output, so the PWM output is disabled.
   TIMER_DISABLE_PWM; // Disable pin 3 PWM output
   delayMicroseconds(time);
 }
 
-void IRSendRev::enableIROut(int khz) {
+void IRSendRev::enableIROut(int khz)
+{
   // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
   // The IR output will be on pin 3 (OC2B).
   // This routine is designed for 36-40KHz; if you use it for other values, it's up to you
@@ -70,31 +75,62 @@ void IRSendRev::enableIROut(int khz) {
 
   // Disable the Timer2 Interrupt (which is used for receiving IR)
   TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
-  
+
   pinMode(TIMER_PWM_PIN, OUTPUT);
   digitalWrite(TIMER_PWM_PIN, LOW); // When not sending PWM, we want it low
 
   TIMER_CONFIG_KHZ(khz);
   TIMER_ENABLE_PWM;
+}
 
+void IRSendRev::ClearNew()
+{
+  IRBufferCounter = 0;
+  MessageCharCount = 0;
+  start_h = 0;
+  start_l = 0;
+  first = 0;
+  ready = false;
+  irparams.rcvstate = STATE_IDLE;
+  ClearSRBuffer();
+}
+
+void IRSendRev::ClearSRBuffer()
+{
+  for (int i = 0; i < MaxMsgSize; i++)
+  {
+    SendReceiveBuffer[i] = '_';
+  }
 }
 
 void IRSendRev::Init(int revPin)
 {
-    irparams.recvpin    = revPin;
-    
-    enableIRIn(); // Start the receiver
-    delay(20);
-    Clear();
+  irparams.recvpin = revPin;
+  IRBufferCounter = 0;
+  MessageCharCount = 0;
+  start_h = 0;
+  start_l = 0;
+  first = 0;
+  ready = false;
+  enableIRIn(); // Start the receiver
+  delay(20);
+  ClearNew();
 }
 
 void IRSendRev::Init()
 {
-    delay(20);
-    Clear();
+  IRBufferCounter = 0;
+  MessageCharCount = 0;
+  start_h = 0;
+  start_l = 0;
+  first = 0;
+  ready = 0;
+  delay(20);
+  ClearNew();
 }
 // initialization
-void IRSendRev::enableIRIn() {
+void IRSendRev::enableIRIn()
+{
   cli();
   // setup pulse clock timer interrupt
   //Prescale /8 (16M/8 = 0.5 microseconds per tick)
@@ -107,14 +143,67 @@ void IRSendRev::enableIRIn() {
 
   TIMER_RESET;
 
-  sei();  // enable interrupts
+  sei(); // enable interrupts
 
   // initialize state machine variables
   irparams.rcvstate = STATE_IDLE;
-  irparams.rawlen = 0;
+  //irparams.rawlen = 0;
 
   // set pin modes
   pinMode(irparams.recvpin, INPUT);
+}
+
+void CombineIRBuffer()
+{
+  if (IR.first == 0)
+    IR.first = IR.IRBuffer[0];
+  else if (IR.start_h == 0)
+    IR.start_h = IR.IRBuffer[0];
+  else if (IR.start_l == 0)
+    IR.start_l = IR.IRBuffer[0];
+  else
+  {
+    //determine short_time
+    int short_time = 0;
+    int long_time = 0;
+    int long_count = 0;
+    for (int i = 0; i < 16; i += 2)
+    {
+      short_time += IR.IRBuffer[i];
+    }
+    short_time /= 8;
+    for (int i = 1; i < 16; i += 2)
+    {
+      if (IR.IRBuffer[i] > (2 * short_time))
+      {
+        long_time += IR.IRBuffer[i];
+        long_count++;
+      }
+    }
+    IR.long_time = long_time;   // / long_count;
+    IR.short_time = short_time; // / long_count;
+    short_time *= 2;            //getting the doubled of the average short time
+    IR.SendReceiveBuffer[IR.MessageCharCount] = 0x00;
+    for (int i = 1; i < 8; i++)
+    {
+      if (IR.IRBuffer[1 + 2 * i] > (2 * short_time)) //1
+      {
+        IR.SendReceiveBuffer[IR.MessageCharCount] |= 0x01 << (7 - i);
+      }
+      else
+      {
+        IR.SendReceiveBuffer[IR.MessageCharCount] &= ~(0x01 << (7 - i));
+      }
+    }
+    IR.MessageCharCount++;
+  }
+  IR.IRBufferCounter = 0;
+}
+
+void incstuff()
+{
+  Serial.println("ja");
+  CombineIRBuffer();
 }
 
 // TIMER2 interrupt code to collect raw data.
@@ -129,244 +218,343 @@ ISR(TIMER_INTR_NAME)
 {
   TIMER_RESET;
 
-  uint8_t irdata = (uint8_t)digitalRead(irparams.recvpin);
+  int irdata = (int)digitalRead(irparams.recvpin);
 
   irparams.timer++; // One more 50us tick
-  if (irparams.rawlen >= RAWBUF) {
+  if (IR.MessageCharCount >= MaxMsgSize)
+  {
     // Buffer overflow
+    IR.ready = true;
     irparams.rcvstate = STATE_STOP;
   }
-  switch(irparams.rcvstate) {
+  switch (irparams.rcvstate)
+  {
   case STATE_IDLE: // In the middle of a gap
-    if (irdata == MARK) {
-      if (irparams.timer < GAP_TICKS) {
+    if (irdata == MARK)
+    {
+      if (irparams.timer < GAP_TICKS)
+      {
         // Not big enough to be a gap.
         irparams.timer = 0;
-      } 
-      else {
+      }
+      else
+      {
         // gap just ended, record duration and start recording transmission
-        irparams.rawlen = 0;
-        irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+        //irparams.rawlen = 0;
+        IR.IRBufferCounter = 0;
+        IR.IRBuffer[IR.IRBufferCounter++] = irparams.timer;
+        //irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+        if (IR.IRBufferCounter == 16 || IR.start_h == 0 || IR.start_l == 0 || IR.first == 0)
+          CombineIRBuffer();
+
         irparams.timer = 0;
         irparams.rcvstate = STATE_MARK;
       }
     }
     break;
   case STATE_MARK: // timing MARK
-    if (irdata == SPACE) {   // MARK ended, record time
-      irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+    if (irdata == SPACE)
+    { // MARK ended, record time
+      IR.IRBuffer[IR.IRBufferCounter++] = irparams.timer;
+      //irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+      if (IR.IRBufferCounter == 16 || IR.start_h == 0 || IR.start_l == 0 || IR.first == 0)
+        CombineIRBuffer();
+
       irparams.timer = 0;
       irparams.rcvstate = STATE_SPACE;
     }
     break;
   case STATE_SPACE: // timing SPACE
-    if (irdata == MARK) { // SPACE just ended, record it
-      irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+    if (irdata == MARK)
+    { // SPACE just ended, record it
+      IR.IRBuffer[IR.IRBufferCounter++] = irparams.timer;
+      //irparams.rawbuf[irparams.rawlen++] = irparams.timer;
+      if (IR.IRBufferCounter == 16 || IR.start_h == 0 || IR.start_l == 0 || IR.first == 0)
+        CombineIRBuffer();
+
       irparams.timer = 0;
       irparams.rcvstate = STATE_MARK;
     }
-    else { // SPACE
-      if (irparams.timer > GAP_TICKS) {
+    else
+    { // SPACE
+      if (irparams.timer > GAP_TICKS)
+      {
         // big SPACE, indicates gap between codes
         // Mark current code as ready for processing
         // Switch to STOP
         // Don't reset timer; keep counting space width
+        IR.ready = true;
         irparams.rcvstate = STATE_STOP;
-      } 
+      }
     }
     break;
   case STATE_STOP: // waiting, measuring gap
-    if (irdata == MARK) { // reset gap timer
+    if (irdata == MARK)
+    { // reset gap timer
       irparams.timer = 0;
     }
     break;
   }
-
 }
 
-void IRSendRev::Clear() {
+/*void IRSendRev::Clear()
+{
   irparams.rcvstate = STATE_IDLE;
-  irparams.rawlen = 0;
-}
+  //irparams.rawlen = 0;
+}*/
 
 // Decodes the received IR message
 // Returns 0 if no data ready, 1 if data ready.
 // Results of decoding are stored in results
-int IRSendRev::decode(decode_results *results) {
-  results->rawbuf = irparams.rawbuf;
-  results->rawlen = irparams.rawlen;
-  if (irparams.rcvstate != STATE_STOP) {
+int IRSendRev::decode(decode_results *results)
+{
+  //results->rawbuf = irparams.rawbuf;
+  //results->rawlen = irparams.rawlen;
+  if (irparams.rcvstate != STATE_STOP)
+  {
     return ERR;
   }
   // Throw away and start over
-  Clear();
+  ClearNew();
   return 1;
 }
 
 unsigned char IRSendRev::Recv(unsigned char *revData)
-{
-    int count       = results.rawlen;
-    int nshort      = 0;
-    int nlong       = 0;
-    int count_data  = 0;
+{ /*
+  int count = results.rawlen;
+  int nshort = 0;
+  int nlong = 0;
+  int count_data = 0;
 
-    count_data = (count-4)/16;
+  count_data = (count - 4) / 16;
 
-    for(int i = 0; i<10; i++)           // count nshort
+  for (int i = 0; i < 10; i++) // count nshort
+  {
+    nshort += results.rawbuf[3 + 2 * i];
+  }
+  nshort /= 10;
+
+  int i = 0;
+  int j = 0;
+  while (1) // count nlong
+  {
+    if (results.rawbuf[4 + 2 * i] > (2 * nshort))
     {
-        nshort += results.rawbuf[3+2*i];
+      nlong += results.rawbuf[4 + 2 * i];
+      j++;
     }
-    nshort /= 10;
+    i++;
+    if (j == 10)
+      break;
+    if ((4 + 2 * i) > (count - 10))
+      break;
+  }
+  nlong /= j;
 
-    int i = 0;
-    int j = 0;
-    while(1)        // count nlong
+  int doubleshort = 2 * nshort;
+  for (i = 0; i < count_data; i++)
+  {
+    revData[i + D_DATA] = 0x00;
+    for (j = 0; j < 8; j++)
     {
-        if(results.rawbuf[4+2*i] > (2*nshort))
-        {
-            nlong += results.rawbuf[4+2*i];
-            j++;
-        }
-        i++;
-        if(j==10)break;
-        if((4+2*i)>(count-10))break;
+      if (results.rawbuf[4 + 16 * i + j * 2] > doubleshort) // 1
+      {
+        revData[i + D_DATA] |= 0x01 << (7 - j);
+      }
+      else
+      {
+        revData[i + D_DATA] &= ~(0x01 << (7 - j));
+      }
     }
-    nlong /= j;
+  }
+  revData[D_LEN] = count_data + 5;
+  revData[D_STARTH] = results.rawbuf[1];
+  revData[D_STARTL] = results.rawbuf[2];
+  revData[D_SHORT] = nshort;
+  revData[D_LONG] = nlong;
+  revData[D_DATALEN] = count_data;
 
-    int doubleshort = 2*nshort;
-    for(i = 0; i<count_data; i++)
-    {
-        revData[i+D_DATA] = 0x00;
-        for(j = 0; j<8; j++)
-        {
-            if(results.rawbuf[4 + 16*i + j*2] > doubleshort) // 1
-            {
-                revData[i+D_DATA] |= 0x01<< (7-j);
-            }
-            else
-            {
-                revData[i+D_DATA] &= ~(0x01<<(7-j));
-            }
-        }
-    }
-    revData[D_LEN]      = count_data+5;
-    revData[D_STARTH]   = results.rawbuf[1];
-    revData[D_STARTL]   = results.rawbuf[2];
-    revData[D_SHORT]    = nshort;
-    revData[D_LONG]     = nlong;
-    revData[D_DATALEN]  = count_data;
- 
 #if __DEBUG
-    Serial.print("\r\n*************************************************************\r\n");
-    Serial.print("len\t = ");Serial.println(revData[D_LEN]);
-    Serial.print("start_h\t = ");Serial.println(revData[D_STARTH]);
-    Serial.print("start_l\t = ");Serial.println(revData[D_STARTL]);
-    Serial.print("short\t = ");Serial.println(revData[D_SHORT]);
-    Serial.print("long\t = ");Serial.println(revData[D_LONG]);
-    Serial.print("data_len = ");Serial.println(revData[D_DATALEN]);
-    for(int i = 0; i<revData[D_DATALEN]; i++)
-    {
-        Serial.print(revData[D_DATA+i]);Serial.print("\t");
-    }
-    Serial.print("\r\n*************************************************************\r\n");
+  Serial.print("\r\n*************************************************************\r\n");
+  Serial.print("len\t = ");
+  Serial.println(revData[D_LEN]);
+  Serial.print("start_h\t = ");
+  Serial.println(revData[D_STARTH]);
+  Serial.print("start_l\t = ");
+  Serial.println(revData[D_STARTL]);
+  Serial.print("short\t = ");
+  Serial.println(revData[D_SHORT]);
+  Serial.print("long\t = ");
+  Serial.println(revData[D_LONG]);
+  Serial.print("data_len = ");
+  Serial.println(revData[D_DATALEN]);
+  for (int i = 0; i < revData[D_DATALEN]; i++)
+  {
+    Serial.print(revData[D_DATA + i]);
+    Serial.print("\t");
+  }
+  Serial.print("\r\n*************************************************************\r\n");
 #endif
 
-    Clear(); // Receive the next value
-    return revData[D_LEN]+1;
+  Clear(); // Receive the next value
+  return revData[D_LEN] + 1;
+*/
+  return 0;
 }
 
 //if get some data from IR
 unsigned char IRSendRev::IsDta()
 {
+  return ((MessageCharCount != 0) ? 1 : 0);
+}
 
-    if(decode(&results))
-    {
-        int count       = results.rawlen;
-        if(count < 20 || (count -4)%8 != 0)
-        {
-#if __DEBUG
-            Serial.print("IR GET BAD DATA!\r\n");
-#endif
-            Clear();        // Receive the next value
-            return 0;
-        }
-        int count_data  = (count-4) / 16;
-#if __DEBUG
-        Serial.print("ir get data! count_data = ");
-        Serial.println(count_data);
-#endif
-        return (unsigned char)(count_data+6);
-    }
-    else 
-    {
-        return 0;
-    }
+void IRSendRev::ImpSendRaw(unsigned int time, bool *toggleFlag)
+{
+  if (*toggleFlag)
+  {
+    space(time * 50);
+  }
+  else
+  {
+    mark(time * 50);
+  }
+  // toggle
+  *toggleFlag = !(*toggleFlag);
+}
 
+// wrote my Own, cause their function succs regarding optimization
+void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
+{
+  int len = idata[D_LEN];
+  unsigned int start_high = idata[D_STARTH];
+  unsigned int start_low = idata[D_STARTL];
+  unsigned int nshort = idata[D_SHORT];
+  unsigned int nlong = idata[D_LONG];
+  unsigned char datalen = idata[D_DATALEN]; //need to manually set this
+
+#if __DEBUG
+  Serial.println("begin to send ir:\r\n");
+  Serial.print("ifreq = ");
+  Serial.println(ifreq);
+  Serial.print("len = ");
+  Serial.println(len);
+  Serial.print("start_high = ");
+  Serial.println(start_high);
+  Serial.print("start_low = ");
+  Serial.println(start_low);
+  Serial.print("nshort = ");
+  Serial.println(nshort);
+  Serial.print("nlong = ");
+  Serial.println(nlong);
+  Serial.print("datalen = ");
+  Serial.println(datalen);
+#endif
+
+  bool toggle = false;
+  bool *toggleFlag = &toggle;
+
+  enableIROut(ifreq);
+
+  // send starting
+  ImpSendRaw(start_high, toggleFlag);
+  // equal = !equal;
+  ImpSendRaw(start_low, toggleFlag);
+  // send data:
+
+  for (int i = 0; i < datalen; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      if (idata[6 + i] & 0x01 << (7 - j))
+      {
+        ImpSendRaw(nshort, toggleFlag);
+        ImpSendRaw(nlong, toggleFlag);
+      }
+      else
+      {
+        ImpSendRaw(nshort, toggleFlag);
+        ImpSendRaw(nshort, toggleFlag);
+      }
+    }
+  }
+
+  //send ending
+  ImpSendRaw(nshort, toggleFlag);
+  ImpSendRaw(nshort, toggleFlag);
+
+  space(0); //they said "Just to be sure" yeah, why not
 }
 
 void IRSendRev::Send(unsigned char *idata, unsigned char ifreq)
 {
-    int len = idata[0];
-    unsigned char start_high    = idata[1];
-    unsigned char start_low     = idata[2];
-    unsigned char nshort        = idata[3];
-    unsigned char nlong         = idata[4];
-    unsigned char datalen       = idata[5];
+  int len = idata[0];
+  unsigned char start_high = idata[1];
+  unsigned char start_low = idata[2];
+  unsigned char nshort = idata[3];
+  unsigned char nlong = idata[4];
+  unsigned char datalen = idata[5];
 
-    unsigned int *pSt = (unsigned int *)malloc((4+datalen*16)*sizeof(unsigned int));
+  unsigned int *pSt = (unsigned int *)malloc((4 + datalen * 16) * sizeof(unsigned int));
 
-    if(NULL == pSt)
-    {
+  if (NULL == pSt)
+  {
 #if __DEBUG
-        Serial.println("not enough place!!\r\n");
+    Serial.println("not enough place!!\r\n");
 #endif
-        exit(1);
-    }
-
-#if __DEBUG
-    Serial.println("begin to send ir:\r\n");
-    Serial.print("ifreq = ");Serial.println(ifreq);
-    Serial.print("len = ");Serial.println(len);
-    Serial.print("start_high = ");Serial.println(start_high);
-    Serial.print("start_low = ");Serial.println(start_low);
-    Serial.print("nshort = ");Serial.println(nshort);
-    Serial.print("nlong = ");Serial.println(nlong);
-    Serial.print("datalen = ");Serial.println(datalen);
-#endif
-
-    pSt[0] = start_high*50;
-    pSt[1] = start_low*50;
-
-    for(int i = 0; i<datalen; i++)
-    {
-        for(int j = 0; j<8; j++)
-        {
-            if(idata[6+i] & 0x01<<(7-j))
-            {
-                pSt[16*i + 2*j + 2] = nshort*50;
-                pSt[16*i + 2*j+3]   = nlong*50;
-            }
-            else
-            {
-                pSt[16*i + 2*j+2]   = nshort*50;
-                pSt[16*i + 2*j+3]   = nshort*50;
-            }
-        }
-    }
-
-    pSt[2+datalen*16]   = nshort*50;
-    pSt[2+datalen*16+1] = nshort*50;
+    exit(1);
+  }
 
 #if __DEBUG
-    for(int i = 0; i<4+datalen*16; i++)
-    {
-        Serial.print(pSt[i]);Serial.print("\t");
-    }
-    Serial.println();
+  Serial.println("begin to send ir:\r\n");
+  Serial.print("ifreq = ");
+  Serial.println(ifreq);
+  Serial.print("len = ");
+  Serial.println(len);
+  Serial.print("start_high = ");
+  Serial.println(start_high);
+  Serial.print("start_low = ");
+  Serial.println(start_low);
+  Serial.print("nshort = ");
+  Serial.println(nshort);
+  Serial.print("nlong = ");
+  Serial.println(nlong);
+  Serial.print("datalen = ");
+  Serial.println(datalen);
 #endif
-    sendRaw(pSt, 4+datalen*16, ifreq);
-    free(pSt);
-    
+
+  pSt[0] = start_high * 50;
+  pSt[1] = start_low * 50;
+
+  for (int i = 0; i < datalen; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      if (idata[6 + i] & 0x01 << (7 - j))
+      {
+        pSt[16 * i + 2 * j + 2] = nshort * 50;
+        pSt[16 * i + 2 * j + 3] = nlong * 50;
+      }
+      else
+      {
+        pSt[16 * i + 2 * j + 2] = nshort * 50;
+        pSt[16 * i + 2 * j + 3] = nshort * 50;
+      }
+    }
+  }
+
+  pSt[2 + datalen * 16] = nshort * 50;
+  pSt[2 + datalen * 16 + 1] = nshort * 50;
+
+#if __DEBUG
+  for (int i = 0; i < 4 + datalen * 16; i++)
+  {
+    Serial.print(pSt[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
+#endif
+  sendRaw(pSt, 4 + datalen * 16, ifreq);
+  free(pSt);
 }
 
 IRSendRev IR;

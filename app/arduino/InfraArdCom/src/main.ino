@@ -10,7 +10,7 @@
 #define BIT_DATA 6
 
 //own defines
-#define Arraylength 520
+#define Arraylength 127
 
 //variable from example : define the base frequenz
 const int ir_freq = 38; // 38k
@@ -30,12 +30,12 @@ void ClearSendRecBuffer()
 
 void FlagsInit()
 {
-  SendRecBuffer[BIT_LEN] = 11;      // all data that needs to be sent
+  SendRecBuffer[BIT_LEN] = 1;      // all data that needs to be sent
   SendRecBuffer[BIT_START_H] = 179; // the logic high duration of "Start"
   SendRecBuffer[BIT_START_L] = 90;  // the logic low duration of "Start"
-  SendRecBuffer[BIT_DATA_H] = 11;   // the logic "long" duration in the communication
-  SendRecBuffer[BIT_DATA_L] = 33;   // the logic "short" duration in the communication
-  SendRecBuffer[BIT_HANDSHAKE] = 6;
+  SendRecBuffer[BIT_DATA_H] = 10;   // the logic "long" duration in the communication
+  SendRecBuffer[BIT_DATA_L] =95;   // the logic "short" duration in the communication
+  SendRecBuffer[BIT_HANDSHAKE] = Arraylength;
 }
 
 // Send the Buffer to the host-computer using serial connection
@@ -43,7 +43,7 @@ void SerSend()
 {
   if (SendRecBuffer[BIT_DATA] == '\n')
     return;
-  for (int i = 0; i < Arraylength; i++)
+  for (int i = BIT_DATA; i < Arraylength; i++)
   {
     Serial.write(SendRecBuffer[i]);
     if (SendRecBuffer[i] == '\n')
@@ -69,6 +69,15 @@ void SerRecieve()
   }
 }
 
+void IRSend()
+{
+  if (SendRecBuffer[BIT_DATA] == '\n') return;
+  IR.ImpSend(SendRecBuffer, 38);
+  delay(1000);
+  //IR.Send(SendRecBuffer, 38);
+  //delay(1000);
+}
+
 void IRReceive()
 {
   if (IR.IsDta())
@@ -92,8 +101,8 @@ void setup()
 void loop()
 {
   SerRecieve();
-  //IR.Send(SendRecBuffer, 38);
-  IRReceive();
+  IRSend();
+  //IRReceive();
   SerSend();
   ClearSendRecBuffer();
 }

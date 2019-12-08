@@ -107,11 +107,13 @@
 
 // information for the interrupt handler
 typedef struct {
-    uint8_t recvpin;              // pin for IR data from detector
-    uint8_t rcvstate;             // state machine
+    int recvpin;              // pin for IR data from detector
+    int rcvstate;             // state machine
     unsigned int timer;           // state timer, counts 50uS ticks.
-    unsigned int rawbuf[RAWBUF];  // raw data
-    uint8_t rawlen;               // counter of entries in rawbuf
+    //unsigned int rawbuf[RAWBUF];  // raw data
+    //unsigned int rawbuf[RAWBUF];  // raw data
+    
+    //unsigned int rawlen;               // counter of entries in rawbuf
 } irparams_t;
 
 // Defined in IRremote.cpp
@@ -132,7 +134,7 @@ extern volatile irparams_t irparams;
 #define TIMER_DISABLE_INTR   (TIMSK2 = 0)
 #define TIMER_INTR_NAME      TIMER2_COMPA_vect
 #define TIMER_CONFIG_KHZ(val) ({ \
-  const uint8_t pwmval = SYSCLOCK / 2000 / (val); \
+  const int pwmval = SYSCLOCK / 2000 / (val); \
   TCCR2A = _BV(WGM20); \
   TCCR2B = _BV(WGM22) | _BV(CS20); \
   OCR2A = pwmval; \
