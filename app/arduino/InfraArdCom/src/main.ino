@@ -22,12 +22,11 @@ unsigned char SendRecBuffer[MaxMsgSize];
 // clearing the SendRecieve Buffer
 void ClearSendRecBuffer()
 {
-  Arraylength = 0;  
-  FlagsInit();
-  SendRecBuffer[BIT_DATA] = '\n';
-  for (int i = BIT_DATA + 1; i < MaxMsgSize; i++)
+  Arraylength = 0; 
+  SendRecBuffer[0] = '\n';
+  for (int i = 1; i < MaxMsgSize; i++)
   {
-    SendRecBuffer[i] = ' ';
+    SendRecBuffer[i] = '\n';
   }
 }
 
@@ -44,10 +43,9 @@ void FlagsInit()
 // Send the Buffer to the host-computer using serial connection
 void SerSend()
 {
-  if (SendRecBuffer[BIT_DATA] == '\n')
+  if (SendRecBuffer[0] == '\n')
     return;
-  Serial.println("tried to send:");
-  for (int i = BIT_DATA; i < MaxMsgSize; i++)
+  for (int i = 0; i < MaxMsgSize; i++)
   {
     Serial.write(SendRecBuffer[i]);
     if (SendRecBuffer[i] == '\n')
@@ -94,7 +92,8 @@ void IRReceive()
     IR.ClearNew();
     return;
   }
-  Serial.println("other:");
+  #if __DEBUG
+      Serial.println("other:");
       Serial.print("start_l: ");Serial.print(IR.start_l);
       Serial.write('\n');
       Serial.print("start_h: ");Serial.print(IR.start_h);
@@ -104,12 +103,13 @@ void IRReceive()
       Serial.print("short_time: ");Serial.print(IR.short_time);
       Serial.write('\n');        
       Serial.print("long_time: ");Serial.print(IR.long_time);
-      Serial.write('\n');         
+      Serial.write('\n');
+    #endif         
       for (int i=0; i<MaxMsgSize; i++)
       {
-        Serial.write(IR.SendReceiveBuffer[i]);
+        SendRecBuffer[i] = IR.SendReceiveBuffer[i];
+        if (IR.SendReceiveBuffer[i] == '\n') break;
       }
-    Serial.println("\nend");
     IR.ClearNew();
   }
 }
@@ -125,7 +125,8 @@ void setup()
 void loop()
 {
   SerRecieve();
-  IRSend();
+  IRSend();  
+  ClearSendRecBuffer();
   IRReceive();
   SerSend();
   ClearSendRecBuffer();

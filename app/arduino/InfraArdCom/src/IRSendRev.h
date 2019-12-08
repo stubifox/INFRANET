@@ -34,7 +34,7 @@
 // when received due to sensor lag.
 #define MARK_EXCESS 100
 
-#define __DEBUG 1
+#define __DEBUG 0
 
 // Results returned from the decoder
 class decode_results
