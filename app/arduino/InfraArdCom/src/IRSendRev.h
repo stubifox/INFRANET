@@ -54,7 +54,7 @@ private:
 
 private:
     int decode(decode_results *results);
-    void enableIRIn();
+
 
 public:
     volatile bool ready;
@@ -84,11 +84,13 @@ private:
 
     void mark(int usec);
     void space(int usec);
-    void enableIROut(int khz);
+
 
 public:
     void ImpSend(unsigned char *idata, unsigned char ifreq);
     void Send(unsigned char *idata, unsigned char ifreq);
+    void EnableIROut(int khz);
+    void EnableIRIn();
 };
 
 extern IRSendRev IR;

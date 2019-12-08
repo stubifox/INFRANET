@@ -15,6 +15,8 @@ int Arraylength;
 //variable from example : define the base frequenz
 const int ir_freq = 38; // 38k
 
+const int pinRecv = 2; 
+
 unsigned char SendRecBuffer[MaxMsgSize];
 
 // clearing the SendRecieve Buffer
@@ -75,22 +77,40 @@ void SerRecieve()
 
 void IRSend()
 {
+  //IR.EnableIROut(ir_freq);
   if (SendRecBuffer[BIT_DATA] == '\n') return;
   IR.ImpSend(SendRecBuffer, 38);
   delay(1000);
+  IR.ClearNew();
+  IR.EnableIRIn();
 }
 
 void IRReceive()
 {
-  if (IR.IsDta())
+  if(IR.ready)                  // get IR data
   {
-    //IR.Recv(SendRecBuffer);
-    SendRecBuffer[BIT_DATA] = 'K';
-    SendRecBuffer[BIT_DATA+1] = 'R';    
-    SendRecBuffer[BIT_DATA+2] = 'A';    
-    SendRecBuffer[BIT_DATA+3] = 'S';    
-    SendRecBuffer[BIT_DATA+4] = 'S';    
-    SendRecBuffer[BIT_DATA+5] = '\n';    
+  if ((IR.start_l < 50 && IR.start_h > 0) || (IR.start_h < 50 && IR.start_h > 0) || IR.MessageCharCount == 0)
+  {
+    IR.ClearNew();
+    return;
+  }
+  Serial.println("other:");
+      Serial.print("start_l: ");Serial.print(IR.start_l);
+      Serial.write('\n');
+      Serial.print("start_h: ");Serial.print(IR.start_h);
+      Serial.write('\n');
+      Serial.print("data_len: ");Serial.print(IR.MessageCharCount);
+      Serial.write('\n');        
+      Serial.print("short_time: ");Serial.print(IR.short_time);
+      Serial.write('\n');        
+      Serial.print("long_time: ");Serial.print(IR.long_time);
+      Serial.write('\n');         
+      for (int i=0; i<MaxMsgSize; i++)
+      {
+        Serial.write(IR.SendReceiveBuffer[i]);
+      }
+    Serial.println("\nend");
+    IR.ClearNew();
   }
 }
 
@@ -98,6 +118,7 @@ void setup()
 {
   Arraylength =0;
   Serial.begin(115200);
+  IR.Init(pinRecv);
   ClearSendRecBuffer();
 }
 
@@ -105,7 +126,7 @@ void loop()
 {
   SerRecieve();
   IRSend();
-  //IRReceive();
+  IRReceive();
   SerSend();
   ClearSendRecBuffer();
 }

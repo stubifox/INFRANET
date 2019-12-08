@@ -27,7 +27,7 @@ volatile irparams_t irparams;
 
 void IRSendRev::sendRaw(unsigned int buf[], int len, int hz)
 {
-  enableIROut(hz);
+  EnableIROut(hz);
 
   for (int i = 0; i < len; i++)
   {
@@ -60,7 +60,7 @@ void IRSendRev::space(int time)
   delayMicroseconds(time);
 }
 
-void IRSendRev::enableIROut(int khz)
+void IRSendRev::EnableIROut(int khz)
 {
   // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
   // The IR output will be on pin 3 (OC2B).
@@ -99,7 +99,7 @@ void IRSendRev::ClearSRBuffer()
 {
   for (int i = 0; i < MaxMsgSize; i++)
   {
-    SendReceiveBuffer[i] = '_';
+    SendReceiveBuffer[i] = '\n';
   }
 }
 
@@ -112,7 +112,7 @@ void IRSendRev::Init(int revPin)
   start_l = 0;
   first = 0;
   ready = false;
-  enableIRIn(); // Start the receiver
+  EnableIRIn(); // Start the receiver
   delay(20);
   ClearNew();
 }
@@ -129,7 +129,7 @@ void IRSendRev::Init()
   ClearNew();
 }
 // initialization
-void IRSendRev::enableIRIn()
+void IRSendRev::EnableIRIn()
 {
   cli();
   // setup pulse clock timer interrupt
@@ -455,7 +455,7 @@ void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
   bool toggle = false;
   bool *toggleFlag = &toggle;
 
-  enableIROut(ifreq);
+  EnableIROut(ifreq);
 
   // send starting
   ImpSendRaw(start_high, toggleFlag);
