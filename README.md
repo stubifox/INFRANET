@@ -39,6 +39,15 @@ Die Anwendung sollte nun starten... wahrscheinlich
 
 das npm modul python-shell spielt hier eine wichtige rolle wie die beiden kommunizieren man koennte ja mal in die Doku schauen
 
+## Deployment:
+
+```
+$ yarn package-windows
+$ yarn package-debian
+```
+
+Die Befehle erstellen jeweils ein Ordner der alles zum ausführen enthält. Diese Ordner zippen und hochladen.
+
 
 ## Link zum Tagebuch:
 https://docs.google.com/spreadsheets/d/1TWkekIDpQT2U8OpKi3ymxciaGM6Ei_RP9KROXNjyts4/edit?usp=sharing
