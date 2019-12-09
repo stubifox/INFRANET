@@ -20,7 +20,8 @@ def serDuplexRead(ardCon):
             # filter
             if readInput in (b'', b'\n', b' '):
                 continue
-            __handleIncomingMessage(ardCon, readInput)
+            print("readInput after filter:", readInput)
+            __handleIncomingMessage(ardCon, readInput)  
             # TODO write to DB instead of console
             #address = ('localhost', 6300)
             #con = Client(address, authkey=b'PyToPyCom')
@@ -45,9 +46,11 @@ def serDuplexWrite(ardCon):
         listener = Listener(address, authkey=b'PyToPyCom')
         con = listener.accept()
         while True:
-            msg = str.encode(con.recv())
+            msg = con.recv()
+            print("Sending this msg now:", msg)
             try:
                 encryptedMessage = __encryptOutgoingMessage(msg)
+                print("encrpytedMessage:", encryptedMessage)
                 ardCon.write(encryptedMessage) 
                 con.close()
                 listener.close()
@@ -92,6 +95,8 @@ def waitForArdStateReq(ardCon):
 def __handleIncomingMessage(ardCon, incomingByteArray):
     encryptionHandler = EncryptionHandler()
     decryptedMessage = encryptionHandler.decryptByteArray(incomingByteArray)
+    print("Decrpyted Message:", decryptedMessage)
+    print("partnerId", ardCon.partnerId)
     DataBaseUtilities.insertMessageAndSender(ardCon.partnerId, decryptedMessage)
 
 def __encryptOutgoingMessage(outgoingString):
