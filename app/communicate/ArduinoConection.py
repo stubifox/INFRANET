@@ -21,18 +21,18 @@ class ArduinoConection:
         except Exception as e:
             # TODO logging
             print("error from write:")
-            print (e)
+            print(e)
 
     def readline(self):
         msg = ""
-        #try:
+        # try:
         msg = self.__serCon.readline()
-        #except serial.SerialTimeoutException:
-            # TODO reset arduino connection
-            #self.__serCon = None
-        #except:
-            # TODO Logging
-            #print("error from read")
+        # except serial.SerialTimeoutException:
+        # TODO reset arduino connection
+        #self.__serCon = None
+        # except:
+        # TODO Logging
+        #print("error from read")
         return msg
 
     # returns wether a arduino ist connected to the host or not
@@ -50,14 +50,16 @@ class ArduinoConection:
 
     def handleIncomingMessage(self, incomingByteArray):
         encryptionHandler = EncryptionHandler()
-        decryptedMessage = encryptionHandler.decryptByteArray(incomingByteArray)
-        DataBaseUtilities.insertMessageAndSender(self.__partnerId, decryptedMessage)
+        decryptedMessage = encryptionHandler.decryptByteArray(
+            incomingByteArray)
+        DataBaseUtilities.insertMessageAndSender(
+            self.__partnerId, decryptedMessage)
 
     # returns wether another Arduino to Communicate with was found or not
     def getArdComState(self):
         # TODO More logic if needed
         return self.__conToArd
-    
+
     def resetArdCon(self):
         self.__serCon = None
 
@@ -72,14 +74,14 @@ class ArduinoConection:
         AllPorts = list(serial.tools.list_ports.comports())
         for port in AllPorts:
             # if not a arduino, no testing required
-            if(str(port).__contains__("Arduino") == False):
-                continue
+            # if(str(port).__contains__("Arduino") == False):
+                # continue
             # also tests if correct software on arduino
-            #try:
+            # try:
                 # Handshake Process
             testCon = serial.Serial(
                 port=port.device, baudrate=115200, timeout=2, write_timeout=2)
-                # on each new connection the arduino will restart, waiting for it
+            # on each new connection the arduino will restart, waiting for it
             time.sleep(2)
             testCon.write(str.encode("~echo~\n"))
             answer = testCon.readline()
@@ -98,10 +100,11 @@ class ArduinoConection:
                         # handshake successfull
                     self.__serCon = testCon
                     break
-            #except:
+            # except:
                 # TODO Log Fail
                 #print("error connecting to serialport: {}".format(port.device))
         return
+
     def IsSerCon(self):
         return self.__serCon != None
 
@@ -112,6 +115,6 @@ class ArduinoConection:
         self.__serCon = None
         self.SearchArdThread = Thread()
         self.getArdConState()
-        #if (self.getArdConState()):
+        # if (self.getArdConState()):
         #    self.__startComListener()
         self.__conToArd = False
