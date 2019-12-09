@@ -59,7 +59,7 @@ def databaseState(lastMessageId, partnerID):
               ) ORDER BY id ASC
           '''
         newData = DataBaseUtilities.getValuesFromDb(
-            sql, counterNewMessages, partnerID)
+            sql,  partnerID, counterNewMessages)
         return True, newData
     else:
         return False, None
@@ -92,7 +92,7 @@ def main():
         lastId = load[DictIndex.ID.value]
         try:
             ardLoc, ardExt, partnerID = requestState()
-            newMessagesInDb, messages = databaseState(lastId, 'mockup')
+            newMessagesInDb, messages = databaseState(lastId, partnerID)
             jsonFrontEnd(ardLoc, ardExt, partnerID, newMessagesInDb, messages)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
