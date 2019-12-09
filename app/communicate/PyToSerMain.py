@@ -18,7 +18,7 @@ def serDuplexRead(ardCon):
         try:
             readInput = ardCon.readline()
             # filter
-            if readInput in ('', '\n', ' '):
+            if readInput in (b'', b'\n', b' '):
                 continue
             __handleIncomingMessage(ardCon, readInput)
             # TODO write to DB instead of console
@@ -92,7 +92,7 @@ def waitForArdStateReq(ardCon):
 def __handleIncomingMessage(ardCon, incomingByteArray):
     encryptionHandler = EncryptionHandler()
     decryptedMessage = encryptionHandler.decryptByteArray(incomingByteArray)
-    DataBaseUtilities.insertMessageAndSender(ardCon.PartnerID, decryptedMessage)
+    DataBaseUtilities.insertMessageAndSender(ardCon.partnerId, decryptedMessage)
 
 def __encryptOutgoingMessage(outgoingString):
     encryptionHandler = EncryptionHandler()
