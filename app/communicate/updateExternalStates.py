@@ -53,13 +53,12 @@ def databaseState(lastMessageId, partnerID):
               FROM (
                 SELECT *
                 FROM message_log AS log 
-                WHERE sender = ?
                 ORDER BY log.id desc
                 LIMIT ?
               ) ORDER BY id ASC
           '''
         newData = DataBaseUtilities.getValuesFromDb(
-            sql,  partnerID, counterNewMessages)
+            sql, counterNewMessages)
         return True, newData
     else:
         return False, None

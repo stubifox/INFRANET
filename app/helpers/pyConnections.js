@@ -74,7 +74,7 @@ export const pyConnections = {
       if (exp === Action.INITIAL) {
         setmessages(response);
       } else if (exp === Action.ENTRY) {
-        setmessages([...messages, response[0]]);
+        return;
       } else if (exp === Action.LOAD_MORE) {
         setmessages([...response, ...messages]);
       } else {
