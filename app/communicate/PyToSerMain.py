@@ -21,12 +21,13 @@ def serDuplexRead(ardCon):
             if readInput in (b'', b'\n', b' '):
                 continue
             print("readInput after filter:", readInput)
-            __handleIncomingMessage(ardCon, readInput)  
+            __handleIncomingMessage(ardCon, readInput)
             # TODO write to DB instead of console
             #address = ('localhost', 6300)
             #con = Client(address, authkey=b'PyToPyCom')
             #con.send(readInput)
             #con.close()
+            DataBaseUtilities.insertMessageAndSender("mockup", readInput.decode())
         except serial.SerialTimeoutException:
             # TODO reset arduino connection
             ardCon.resetArdCon()
@@ -95,9 +96,10 @@ def waitForArdStateReq(ardCon):
 def __handleIncomingMessage(ardCon, incomingByteArray):
     encryptionHandler = EncryptionHandler()
     decryptedMessage = encryptionHandler.decryptByteArray(incomingByteArray)
-    print("Decrpyted Message:", decryptedMessage)
-    print("partnerId", ardCon.partnerId)
-    DataBaseUtilities.insertMessageAndSender(ardCon.partnerId, decryptedMessage)
+    if decryptedMessage != None:
+        print("Decrpyted Message:", decryptedMessage)
+        print("partnerId", ardCon.partnerId)
+        DataBaseUtilities.insertMessageAndSender("mockup", decryptedMessage)
 
 def __encryptOutgoingMessage(outgoingString):
     encryptionHandler = EncryptionHandler()

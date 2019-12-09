@@ -24,12 +24,10 @@ class EncryptionHandler:
     def encryptString(self, stringToEncrypt):
         '''TReturns void if the encryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
-        blake = blake2b(digest_size=16)
+        blake = blake2b(digest_size=32)
         try:
             blake.update(b"357ca43f-a7bb-4a2e-94a1-aee2b322947d")
-            fernet = Fernet(base64.urlsafe_b64encode(
-                blake.hexdigest().encode()))
-            # auf länge cappen (max 511 bytes) warten auf Kai
+            fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
             return fernet.encrypt(json.dumps(stringToEncrypt).encode())
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
@@ -41,17 +39,19 @@ class EncryptionHandler:
     def decryptByteArray(self, encryptedByteArray):
         '''Returns void if the decryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
-        blake = blake2b(digest_size=16)
+        blake = blake2b(digest_size=32)
         try:
             blake.update(b"357ca43f-a7bb-4a2e-94a1-aee2b322947d")
-            fernet = Fernet(base64.urlsafe_b64encode(
-                blake.hexdigest().encode()))
+            print("FernetKey:", base64.urlsafe_b64encode(blake.digest()))
+            fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
             return json.loads(fernet.decrypt(encryptedByteArray))
         except AttributeError as e:
-            UniversalUtilities.sendErrorMessageToFrontend(e)
+            print(e)
+            #UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
         except InvalidToken as e:
-            UniversalUtilities.sendErrorMessageToFrontend(e)
+            print(e)
+            #UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
 
     def getLocalPublicKey(self):
