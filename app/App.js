@@ -97,7 +97,7 @@ const App = () => {
           messages,
           setmessages
         );
-      }, 1000)
+      }, 600)
     );
   }, [messages]);
 

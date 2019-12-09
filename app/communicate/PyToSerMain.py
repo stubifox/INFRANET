@@ -13,7 +13,7 @@ import time
 
 def serDuplexRead(ardCon):
     while(True):
-        if ardCon.getArdConState() == False :
+        if ardCon.getArdConState() == False:
             continue
         try:
             readInput = ardCon.readline()
@@ -25,9 +25,9 @@ def serDuplexRead(ardCon):
             # TODO write to DB instead of console
             #address = ('localhost', 6300)
             #con = Client(address, authkey=b'PyToPyCom')
-            #con.send(readInput)
-            #con.close()
-            DataBaseUtilities.insertMessageAndSender("mockup", readInput.decode())
+            # con.send(readInput)
+            # con.close()
+            # DataBaseUtilities.insertMessageAndSender("mockup", readInput.decode())
         except serial.SerialTimeoutException:
             # TODO reset arduino connection
             ardCon.resetArdCon()
@@ -52,7 +52,7 @@ def serDuplexWrite(ardCon):
             try:
                 encryptedMessage = __encryptOutgoingMessage(msg)
                 print("encrpytedMessage:", encryptedMessage)
-                ardCon.write(encryptedMessage) 
+                ardCon.write(encryptedMessage)
                 con.close()
                 listener.close()
                 break
@@ -93,6 +93,7 @@ def waitForArdStateReq(ardCon):
     print("connection closed")
     listener.close()
 
+
 def __handleIncomingMessage(ardCon, incomingByteArray):
     encryptionHandler = EncryptionHandler()
     decryptedMessage = encryptionHandler.decryptByteArray(incomingByteArray)
@@ -101,13 +102,15 @@ def __handleIncomingMessage(ardCon, incomingByteArray):
         print("partnerId", ardCon.partnerId)
         DataBaseUtilities.insertMessageAndSender("mockup", decryptedMessage)
 
+
 def __encryptOutgoingMessage(outgoingString):
     encryptionHandler = EncryptionHandler()
     return encryptionHandler.encryptString(outgoingString)
 
+
 def main():
     # TODO read this identifier from the STDIn to get the information >> Max in following
-    ardCon = ArduinoConection()#936DA01F-9ABD-4D9D-80C7-02AF85C822A8
+    ardCon = ArduinoConection()  # 936DA01F-9ABD-4D9D-80C7-02AF85C822A8
     ardStateReqListener = Thread(target=waitForArdStateReq, args=(ardCon,))
     pyToSerWriteListener = Thread(target=serDuplexWrite, args=(ardCon,))
     serReadToPyListener = Thread(target=serDuplexRead, args=(ardCon,))

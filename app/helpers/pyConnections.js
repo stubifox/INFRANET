@@ -43,7 +43,6 @@ export const pyConnections = {
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
-      console.error(message);
     });
 
     await pyShell.end((err, code, signal) => {
@@ -71,7 +70,6 @@ export const pyConnections = {
 
     pyShell.on("message", response => {
       printLoggingOrErrorMessages(response);
-      console.log(response);
 
       if (exp === Action.INITIAL) {
         setmessages(response);
@@ -116,7 +114,6 @@ export const pyConnections = {
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
-      console.log(message);
 
       if (exp === Action.INITIAL) {
         setuserDefaults({
@@ -143,14 +140,14 @@ export const pyConnections = {
     const pyShell = createPythonCon("updateExternalStates", "json");
     if (messages.length > 0) {
       const lastID = messages.slice(-1).pop().id;
-      console.log(`lastID: ${lastID}`);
       pyShell.send(createReceivingData(Action.ID, lastID));
     } else {
       pyShell.send(createReceivingData(Action.INITIAL, undefined));
     }
     pyShell.on("message", updates => {
       printLoggingOrErrorMessages(updates);
-      if (updates[Action.SHOULD_UPDATE_MESSAGES] === "True") {
+
+      if (updates[Action.SHOULD_UPDATE_MESSAGES]) {
         setmessages([...messages, ...updates[Action.NEW_MESSAGES]]);
       } else {
         setExternalStates({
@@ -161,14 +158,10 @@ export const pyConnections = {
           chatPartnerUUID: updates[Action.PARTNER_ID]
         });
       }
-      console.log(updates);
     });
 
     pyShell.end((err, code, signal) => {
       if (err) throw err;
-      console.log(
-        `Python File updateExternalStates.py ended with code: ${code} and signal: ${signal}`
-      );
     });
   }
 };
