@@ -18,7 +18,11 @@ import { purple } from "@material-ui/core/colors";
 import { AppHeader } from "./AppHeader";
 import { CustomizedSnackbar } from "./CustomSnackBar";
 import { pyConnections } from "./helpers/pyConnections";
-import { Action, SnackBarStyle } from "./helpers/shared";
+import { Action, SnackBarStyle, delayReport } from "./helpers/shared";
+import {
+  setIntervalAsync,
+  clearIntervalAsync
+} from "set-interval-async/dynamic";
 
 const App = () => {
   /**
@@ -26,9 +30,8 @@ const App = () => {
    */
   const [messages, setmessages] = useState([]);
   const [externalStates, setexternalStates] = useState({
-    internalArduinoConnected: true,
-    externalArduinoConnected: true,
-    newMessagesArrived: false,
+    internalArduinoConnected: false,
+    externalArduinoConnected: false,
     chatPartnerUUID: String
   });
   //set initial states to false when implemented
@@ -43,6 +46,8 @@ const App = () => {
     userTheme: true
   });
   const [displaySnackBar, setdisplaySnackBar] = useState(defaultStateSnackBar);
+  const [timer, settimer] = useState(undefined);
+
   /**
    * END OF STATE DECLARATIONS
    */
@@ -68,19 +73,6 @@ const App = () => {
     }
   });
 
-  const askForStates_600 = () => {
-    setInterval(
-      () =>
-        pyConnections.getExternalStateChanges(
-          externalStates,
-          setexternalStates,
-          messages,
-          Action.INITIAL
-        ),
-      600
-    );
-  };
-
   useEffect(() => {
     pyConnections.insertIntoDb("", "", Action.INITIAL);
     pyConnections.userDefaultsHandler(
@@ -88,49 +80,39 @@ const App = () => {
       setuserDefaults,
       Action.INITIAL
     );
-    //remove when states are there!!
-    pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
     setexp(Action.INITIAL);
   }, []);
 
-  //calling every 600ms
   useEffect(() => {
-    askForStates_600();
-    return () => {
-      clearInterval(askForStates_600);
-    };
-  }, []);
-
-  const askForStatesWithID = () => {
-    setInterval(
-      () =>
+    //clear Intervall,
+    if (timer !== undefined) {
+      clearIntervalAsync(timer);
+    }
+    //set new Intervall
+    settimer(
+      setIntervalAsync(() => {
         pyConnections.getExternalStateChanges(
           externalStates,
           setexternalStates,
           messages,
-          Action.ID
-        ),
-      600
+          setmessages
+        );
+      }, 1000)
     );
-  };
+  }, [messages]);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      clearInterval(askForStates_600);
-      askForStatesWithID();
+    if (
+      externalStates.internalArduinoConnected &&
+      externalStates.internalArduinoConnected
+    ) {
+      pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
+      setexp(Action.INITIAL);
     }
-    return () => clearInterval(askForStatesWithID)
-  }, [])
-
-  // useEffect(() => {
-  //   if (
-  //     externalStates.internalArduinoConnected &&
-  //     externalStates.internalArduinoConnected
-  //   ) {
-  //     pyConnections.getFromDb(Action.INITIAL, setmessages, messages);
-  //     setexp(Action.INITIAL);
-  //   }
-  // }, [userDefaults.sender]);
+  }, [
+    externalStates.internalArduinoConnected,
+    externalStates.externalArduinoConnected
+  ]);
 
   /**
    * display SnackBars when connection to either Device on USB is established
@@ -145,9 +127,9 @@ const App = () => {
       (externalStates.externalArduinoConnected
         ? handleShowSnackBar("Connected to Chatpartner", SnackBarStyle.SUCCESS)
         : handleShowSnackBar(
-          "Not connected to Chatpartner!",
-          SnackBarStyle.WARNING
-        ));
+            "Not connected to Chatpartner!",
+            SnackBarStyle.WARNING
+          ));
   }, [
     externalStates.internalArduinoConnected,
     externalStates.externalArduinoConnected

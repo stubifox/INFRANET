@@ -53,9 +53,9 @@ def databaseState(lastMessageId, partnerID):
               FROM (
                 SELECT *
                 FROM message_log AS log 
+                WHERE sender = ?
                 ORDER BY log.id desc
                 LIMIT ?
-                WHERE partner_id = ?
               ) ORDER BY id ASC
           '''
         newData = DataBaseUtilities.getValuesFromDb(
@@ -88,11 +88,11 @@ def main():
             jsonFrontEnd(ardLoc, ardExt, partnerID, None, None)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
-    elif exp == Action.ID.value:
+    else:
         lastId = load[DictIndex.ID.value]
         try:
             ardLoc, ardExt, partnerID = requestState()
-            newMessagesInDb, messages = databaseState(lastId, partnerID)
+            newMessagesInDb, messages = databaseState(lastId, 'mockup')
             jsonFrontEnd(ardLoc, ardExt, partnerID, newMessagesInDb, messages)
         except ConnectionError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)

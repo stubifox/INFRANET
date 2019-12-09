@@ -17,7 +17,6 @@ export const ChatWindow = props => {
   const { messages, setmessages, exp, setexp, externalStates, sender } = props;
   const bottomRef = useRef();
   const [scrollButton, showscrollButton] = useState(false);
-
   /**
    * on App load:
    * - calling function for checking if a DB is present.

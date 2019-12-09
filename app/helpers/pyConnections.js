@@ -135,27 +135,32 @@ export const pyConnections = {
   },
 
   getExternalStateChanges: (
-    {
-      internalArduinoConnected,
-      externalArduinoConnected,
-      newMessagesArrived,
-      chatPartnerUUID
-    },
+    { internalArduinoConnected, externalArduinoConnected, chatPartnerUUID },
     setExternalStates,
     messages,
-    exp
+    setmessages
   ) => {
     const pyShell = createPythonCon("updateExternalStates", "json");
-    if (exp === Action.INITIAL) {
-      pyShell.send(createReceivingData(exp, undefined));
-      console.log(messages.length, undefined);
+    if (messages.length > 0) {
+      const lastID = messages.slice(-1).pop().id;
+      console.log(`lastID: ${lastID}`);
+      pyShell.send(createReceivingData(Action.ID, lastID));
+    } else {
+      pyShell.send(createReceivingData(Action.INITIAL, undefined));
     }
-    if (exp === Action.ID) {
-      pyShell.send(createReceivingData(exp, messages.slice(-1).pop().id));
-    }
-
     pyShell.on("message", updates => {
       printLoggingOrErrorMessages(updates);
+      if (updates[Action.SHOULD_UPDATE_MESSAGES] === "True") {
+        setmessages([...messages, ...updates[Action.NEW_MESSAGES]]);
+      } else {
+        setExternalStates({
+          internalArduinoConnected:
+            updates[Action.LOCAL_ARDUINO_STATE] === "True",
+          externalArduinoConnected:
+            updates[Action.EXTERNAL_ARDUINO_STATE] === "True",
+          chatPartnerUUID: updates[Action.PARTNER_ID]
+        });
+      }
       console.log(updates);
     });
 
@@ -173,7 +178,7 @@ export const pyConnections = {
  * @param {['json', 'text']} mode specifies the mode the data is send to Python
  * @returns {'PythonShell'} pyShell returns a Python Shell instance
  */
-const createPythonCon = (fileName, mode) => {
+export const createPythonCon = (fileName, mode) => {
   return new PythonShell(
     join(__dirname, "..", "communicate", `${fileName}.py`),
     {

@@ -17,6 +17,7 @@
     "python-shell": "^1.0.8",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "set-interval-async": "^1.0.29",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
