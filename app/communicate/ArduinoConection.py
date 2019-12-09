@@ -117,4 +117,4 @@ class ArduinoConection:
         self.getArdConState()
         # if (self.getArdConState()):
         #    self.__startComListener()
-        self.__conToArd = False
+        self.__conToArd = True
