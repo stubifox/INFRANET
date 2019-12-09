@@ -1,18 +1,21 @@
 {
-  "name": "electron-react-python",
+  "name": "infranet",
   "version": "0.1.0",
-  "main": "bootstrapper.js",
+  "main": "./bootstrapper.js",
   "license": "MIT",
+  "description": "Full-Stack INFRANET Application",
   "repository": "https://github.com/stubifox/INFRANET",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package-windows": "electron-packager ./ infranet --platform=win32 --arch=x64",
+	"package-debian": "electron-packager ./ infranet --platform=linux --arch=arm64"
   },
   "dependencies": {
     "@material-ui/core": "^4.5.1",
     "@material-ui/icons": "^4.5.1",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
-    "babel-register": "^6.3.13",
+    "babel-register": "^6.26.0",
     "material-ui": "^0.20.2",
     "python-shell": "^1.0.8",
     "react": "^16.11.0",
@@ -20,6 +23,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "electron": "^7.0.0"
+    "electron": "^7.0.0",
+    "electron-packager": "^14.1.1"
   }
 }
