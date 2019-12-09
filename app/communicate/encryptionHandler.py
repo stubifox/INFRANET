@@ -26,7 +26,7 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=16)
         try:
-            blake.update(keyHandler.shared_key.encode())
+            blake.update("357ca43f-a7bb-4a2e-94a1-aee2b322947d")
             fernet = Fernet(base64.urlsafe_b64encode(
                 blake.hexdigest().encode()))
             # auf länge cappen (max 511 bytes) warten auf Kai
@@ -43,7 +43,7 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=16)
         try:
-            blake.update(keyHandler.shared_key.encode())
+            blake.update("357ca43f-a7bb-4a2e-94a1-aee2b322947d")
             fernet = Fernet(base64.urlsafe_b64encode(
                 blake.hexdigest().encode()))
             return json.loads(fernet.decrypt(encryptedByteArray))

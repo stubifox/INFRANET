@@ -4,6 +4,7 @@ from threading import Thread
 import multiprocessing.connection
 from multiprocessing.connection import Listener
 from multiprocessing.connection import Client
+from encryptionHandler import EncryptionHandler
 from helperClasses import DataBaseUtilities
 import time
 
@@ -15,17 +16,16 @@ def serDuplexRead(ardCon):
         if ardCon.getArdConState() == False :
             continue
         try:
-            readInput = ardCon.readline().decode()
+            readInput = ardCon.readline()
             # filter
             if readInput in ('', '\n', ' '):
                 continue
-            # TODO use decryption here
+            __handleIncomingMessage(ardCon, readInput)
             # TODO write to DB instead of console
             #address = ('localhost', 6300)
             #con = Client(address, authkey=b'PyToPyCom')
             #con.send(readInput)
             #con.close()
-            DataBaseUtilities.insertMessageAndSender('mockup',readInput)
         except serial.SerialTimeoutException:
             # TODO reset arduino connection
             ardCon.resetArdCon()
@@ -47,8 +47,8 @@ def serDuplexWrite(ardCon):
         while True:
             msg = str.encode(con.recv())
             try:
-                #print("writing stuff")
-                ardCon.write(msg) 
+                encryptedMessage = __encryptOutgoingMessage(msg)
+                ardCon.write(encryptedMessage) 
                 con.close()
                 listener.close()
                 break
@@ -89,6 +89,14 @@ def waitForArdStateReq(ardCon):
     print("connection closed")
     listener.close()
 
+def __handleIncomingMessage(ardCon, incomingByteArray):
+    encryptionHandler = EncryptionHandler()
+    decryptedMessage = encryptionHandler.decryptByteArray(incomingByteArray)
+    DataBaseUtilities.insertMessageAndSender(ardCon.PartnerID, decryptedMessage)
+
+def __encryptOutgoingMessage(outgoingString):
+    encryptionHandler = EncryptionHandler()
+    return encryptionHandler.encryptString(outgoingString)
 
 def main():
     # TODO read this identifier from the STDIn to get the information >> Max in following

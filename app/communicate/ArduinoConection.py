@@ -4,7 +4,6 @@ import json
 import serial.tools.list_ports
 from threading import Thread
 from userDefaultsHandler import getUUIDFromSettings
-from encryptionHandler import EncryptionHandler
 from helperClasses import DataBaseUtilities
 
 # capsulates the communication to the Arduino using a Serial Com-Port connection
@@ -47,13 +46,6 @@ class ArduinoConection:
             return False
         else:
             return True
-
-    def handleIncomingMessage(self, incomingByteArray):
-        encryptionHandler = EncryptionHandler()
-        decryptedMessage = encryptionHandler.decryptByteArray(
-            incomingByteArray)
-        DataBaseUtilities.insertMessageAndSender(
-            self.__partnerId, decryptedMessage)
 
     # returns wether another Arduino to Communicate with was found or not
     def getArdComState(self):
@@ -111,7 +103,7 @@ class ArduinoConection:
     def __init__(self):
         self.__localId = json.loads(json.dumps(getUUIDFromSettings()))['value']
         print(self.__localId)
-        self.__partnerId = None
+        self.partnerId = None
         self.__serCon = None
         self.SearchArdThread = Thread()
         self.getArdConState()
