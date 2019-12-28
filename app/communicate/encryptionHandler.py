@@ -1,10 +1,9 @@
+# Author: Tim Heinze
+
 from diffiehellman.diffiehellman import DiffieHellman, MalformedPublicKey
 from cryptography.fernet import Fernet, InvalidToken
 from hashlib import blake2b
 import json
-import sqlite3
-import getFromDb
-import dataBaseConnection
 import jsonpickle
 import base64
 from helperClasses import DataBaseUtilities, UniversalUtilities
@@ -17,16 +16,18 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         try:
             keyHandler.generate_shared_secret(foreignPublicKey)
+            self._insertKeyHandlerIntoDb(keyHandler)
         except MalformedPublicKey as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
-        self._insertKeyHandlerIntoDb(keyHandler)
 
     def encryptString(self, stringToEncrypt):
-        '''TReturns void if the encryption fails'''
+        '''Returns void if the encryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=32)
         try:
-            blake.update(b"357ca43f-a7bb-4a2e-94a1-aee2b322947d")
+            # Using blake2b hashing algorithm to shorten the shared_key
+            blake.update(keyHandler.shared_key.encode())
+            # Using the shortened shared_key as encryption key
             fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
             return fernet.encrypt(json.dumps(stringToEncrypt).encode())
         except AttributeError as e:
@@ -41,17 +42,16 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=32)
         try:
-            blake.update(b"357ca43f-a7bb-4a2e-94a1-aee2b322947d")
-            print("FernetKey:", base64.urlsafe_b64encode(blake.digest()))
+            # Using blake2b hashing algorithm to shorten the shared_key
+            blake.update(keyHandler.shared_key.encode())
+            # Using the shortened shared_key as encryption key
             fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
             return json.loads(fernet.decrypt(encryptedByteArray))
         except AttributeError as e:
-            print(e)
-            #UniversalUtilities.sendErrorMessageToFrontend(e)
+            UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
         except InvalidToken as e:
-            print(e)
-            #UniversalUtilities.sendErrorMessageToFrontend(e)
+            UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
 
     def getLocalPublicKey(self):
@@ -59,7 +59,7 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         return str(keyHandler.public_key)
 
-    def _createAndSaveEncryptionKeys(self):
+    def _createAndSaveKeyHandler(self):
         keyHandler = DiffieHellman(key_length=200, group=5)
         keyHandler.generate_public_key()
         self._insertKeyHandlerIntoDb(keyHandler)
@@ -76,5 +76,5 @@ class EncryptionHandler:
         statement = ''' SELECT value FROM settings WHERE key = 'keyHandlerJson' '''
         results = DataBaseUtilities.getValuesFromDb(statement)
         if len(results) == 0:
-            return self._createAndSaveEncryptionKeys()
+            return self._createAndSaveKeyHandler()
         return jsonpickle.decode(results[0]["value"])

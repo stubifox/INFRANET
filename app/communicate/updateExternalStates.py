@@ -6,7 +6,6 @@
  * @desc [description]
 """
 
-# transferFrontBack.py
 import sys
 import sqlite3
 import os
@@ -14,7 +13,6 @@ import json
 from multiprocessing.connection import Client
 from helperClasses import DataBaseUtilities, UniversalUtilities
 from shared import DictIndex, Action, RequestToken
-
 
 # fuction for requesting the arduino state from an port 6000
 def requestState():
@@ -36,8 +34,6 @@ def requestState():
         UniversalUtilities.sendErrorMessageToFrontend(e)
 
 # function to verify if there are new messages since the last refresh of the frontend and to return these new Messages
-
-
 def databaseState(lastMessageId, partnerID):
     sql = '''SELECT log.id
              FROM message_log AS log 
@@ -64,17 +60,12 @@ def databaseState(lastMessageId, partnerID):
         return False, None
 
 # build json for the frontend withe the arduino states and the new messages
-
-
 def jsonFrontEnd(ardLoc, ardExt, partnerID, newMessagesInDb, messages):
     print(json.dumps({DictIndex.LOCAL_ARDUINO_STATE.value: ardLoc,
                       DictIndex.EXTERNAL_ARDUINO_STATE.value: ardExt,
                       DictIndex.PARTNER_ID.value: partnerID,
                       DictIndex.SHOULD_UPDATE_MESSAGES.value: newMessagesInDb,
                       DictIndex.NEW_MESSAGES.value: messages}))
-
-# main
-
 
 def main():
 
@@ -97,7 +88,6 @@ def main():
             UniversalUtilities.sendErrorMessageToFrontend(e)
         except sqlite3.Error as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
-
 
 if __name__ == '__main__':
     main()
