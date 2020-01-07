@@ -1,3 +1,9 @@
+"""
+ * @author Kai Fischer
+ * @email kathunfischer@googlemail.com
+ * @desc Script to test the backend function to deliver actual connection information. Does 20 requests.
+"""
+
 from multiprocessing.connection import Client
 import time
 message = 'PartnerID'
@@ -21,6 +27,7 @@ def main():
     for i in range(1, 20):
         print("send {}.message".format(i))
         send()
+        #Use "time.sleep()" to vary the connection-state requests per second.
         time.sleep(10)
 
 

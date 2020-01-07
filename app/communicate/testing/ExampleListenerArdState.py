@@ -1,3 +1,8 @@
+"""
+ * @author Kai Fischer
+ * @email kathunfischer@googlemail.com
+ * @desc Script to mockup the backend function to deliver actual connection information. Closes after 20 requests.
+"""
 from multiprocessing.connection import Listener
 
 print("starting")

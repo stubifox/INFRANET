@@ -1,3 +1,10 @@
+"""
+ * @author Kai Fischer
+ * @coauthor Tim Heinze for the encryption and decryption part
+ * @email kathunfischer@googlemail.com
+ * @desc The main-backend file, starts other threads, gets started by the frontend.
+"""
+
 from ArduinoConection import ArduinoConection
 import serial
 from threading import Thread
@@ -8,39 +15,26 @@ from encryptionHandler import EncryptionHandler
 from helperClasses import DataBaseUtilities
 import time
 
-# thread function: Listener on Serial, write to DB
 
-
-def serDuplexRead(ardCon):
+def serDuplexRead(ardCon):# thread function: Listener on Serial, write to DB
     while(True):
         if ardCon.getArdConState() == False:
             continue
         try:
             readInput = ardCon.readline()
-            # filter
+            # filter unwanted nonsense
             if readInput in (b'', b'\n', b' '):
                 continue
             print("readInput after filter:", readInput)
             __handleIncomingMessage(ardCon, readInput)
-            # TODO write to DB instead of console
-            #address = ('localhost', 6300)
-            #con = Client(address, authkey=b'PyToPyCom')
-            # con.send(readInput)
-            # con.close()
-            # DataBaseUtilities.insertMessageAndSender("mockup", readInput.decode())
         except serial.SerialTimeoutException:
-            # TODO reset arduino connection
             ardCon.resetArdCon()
             continue
         except ConnectionRefusedError:
             print("Cannot connect to localhost:6300")
 
-# thread function: Listener to write recieved message on serial connection
 
-
-def serDuplexWrite(ardCon):
-    # TODO use encryption here
-    # TODO return error Msg to FE to tell user message could not be send
+def serDuplexWrite(ardCon):# thread function: Listener to write recieved message on serial connection
     print("start listening for MsgConrequests")
     while(True):
         address = ('localhost', 6200)
@@ -60,27 +54,23 @@ def serDuplexWrite(ardCon):
                 con.close()
                 listener.close()
                 return
-            # con.close()
-            # break
     listener.close()
     print("connection closed")
 
-# thread function: Listener for Arduino State requests
 
 
-def waitForArdStateReq(ardCon):
+
+def waitForArdStateReq(ardCon):# thread function: Listener for Arduino State requests
     print("start listening for ardConrequests")
     while(True):
-        #print("listen on port 6000")
         address = ('localhost', 6000)
         listener = Listener(address, authkey=b'PyToPyCom')
         con = listener.accept()
-        #print('connection accepted from {}'.format(listener.last_accepted))
         while True:
             msg = con.recv()
-            if msg == 'ArdConState':  # connection state
+            if msg == 'ArdConState':  # arduino connected?
                 con.send(str(ardCon.getArdConState()))
-            elif msg == 'CommunicationState':  # communication state
+            elif msg == 'CommunicationState':  # partner found?
                 con.send(str(ardCon.getArdComState()))
             elif msg == 'PartnerID':
                 con.send('mockup')
@@ -88,8 +78,6 @@ def waitForArdStateReq(ardCon):
                 con.close()
                 listener.close()
                 break
-            # con.close()
-            # break
     print("connection closed")
     listener.close()
 
@@ -114,7 +102,6 @@ def main():
     ardStateReqListener = Thread(target=waitForArdStateReq, args=(ardCon,))
     pyToSerWriteListener = Thread(target=serDuplexWrite, args=(ardCon,))
     serReadToPyListener = Thread(target=serDuplexRead, args=(ardCon,))
-    # still testing
     print("waiting 5")
     time.sleep(5)
     print("starting the threads")
