@@ -1,16 +1,13 @@
 /*
- * IRremote
- * Version 0.1 July, 2009
- * Copyright 2009 Ken Shirriff
- * For details, see http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- *
- * Modified by Paul Stoffregen <paul@pjrc.com> to support other boards and timers
- *
- * Interrupt code based on NECIRrcv by Joe Knapp
- * http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1210243556
- * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
- *
- * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
+ * author Kai Fischer only of the modification
+ * @email kathunfischer@googlemail.com
+ * @desc definitions for the Interrupt service routine implemented in the "IRSendRev.cpp"
+ * 
+ * @info    this is a modified version of the original "https://github.com/Seeed-Studio/IRSendRev/blob/master/IRSendRevInt.h"
+ *          to fit the needs of the InfranetProjekt only a little was changed
+ *          i tried to mark every modification. Search for "modified"
+ * 
+ * please see the original file for the copyright 
  */
 
 #ifndef _IRSENDREVINT_H_
@@ -110,10 +107,7 @@ typedef struct {
     int recvpin;              // pin for IR data from detector
     int rcvstate;             // state machine
     unsigned int timer;           // state timer, counts 50uS ticks.
-    //unsigned int rawbuf[RAWBUF];  // raw data
-    //unsigned int rawbuf[RAWBUF];  // raw data
-    
-    //unsigned int rawlen;               // counter of entries in rawbuf
+    /* modified: deleted unnecessary counter and buffer*/
 } irparams_t;
 
 // Defined in IRremote.cpp

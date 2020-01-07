@@ -1,15 +1,11 @@
 /*
- * IRremote
- * Version 0.1 July, 2009
- * Copyright 2009 Ken Shirriff
- * For details, see http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.htm http://arcfn.com
- * Edited by Mitra to add new controller SANYO
- *
- * Interrupt code based on NECIRrcv by Joe Knapp
- * http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1210243556
- * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
- *
- * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
+ * @author Kai Fischer
+ * @email kathunfischer@googlemail.com
+ * @desc definition of the used classes, implementation in "IRSendRev.cpp"
+ * 
+ * @info    this is a modified version of the original "https://github.com/Seeed-Studio/IRSendRev/blob/master/IRSendRev.h"
+ *          to fit the needs of the InfranetProjekt, like other send and recieve methods
+ *          all modified parts are marked: search for "modified"
  */
 
 #ifndef _IRSENDREV_H_
@@ -27,8 +23,10 @@
 #define n_short = 11
 
 #define USECPERTICK 50 // microseconds per clock interrupt tick
-//#define RAWBUF 300     // Length of raw duration buffer delete this later
+
+// modified:
 #define MaxMsgSize 520
+// end modified
 
 // Marks tend to be 100us too long, and spaces 100us too short
 // when received due to sensor lag.
@@ -55,7 +53,7 @@ private:
 private:
     int decode(decode_results *results);
 
-
+// modified:
 public:
     volatile bool ready;
     volatile unsigned char start_h;
@@ -91,6 +89,7 @@ public:
     void Send(unsigned char *idata, unsigned char ifreq);
     void EnableIROut(int khz);
     void EnableIRIn();
+// end modified
 };
 
 extern IRSendRev IR;

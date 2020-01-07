@@ -1,3 +1,12 @@
+/*
+ * @author Kai Fischer
+ * @email kathunfischer@googlemail.com
+ * @desc the arduino program, handles the handshake and the real chatting loop of reading and writing messages
+ * 
+ * @info  this file was inspired by the files "https://github.com/Seeed-Studio/IRSendRev/blob/master/examples/send/send.ino" 
+ *        and "https://github.com/Seeed-Studio/IRSendRev/blob/master/examples/recv/recv.ino" 
+ */
+
 #include "IRSendRev.h"
 
 //defines from example
@@ -10,12 +19,11 @@
 #define BIT_DATA 6
 #define GuidLength 36
 
-//own defines
-int Arraylength;
-
 //variable from example : define the base frequenz
 const int ir_freq = 38; // 38k
 
+//own variables:
+int Arraylength;
 const int pinRecv = 2; 
 
 unsigned char SendRecBuffer[MaxMsgSize];
@@ -35,7 +43,7 @@ void GetHostGuid()
         HostGuid[i] = SendRecBuffer[i];
     }
 
-    // confirm got guid
+    // confirm: got guid
     Serial.write(GotGuidMsg);
     ConToHost = true;
     InitStep = 2;
@@ -118,17 +126,15 @@ void SerRecieve()
 
 void IRSend()
 {
-  //IR.EnableIROut(ir_freq);
   if (SendRecBuffer[BIT_DATA] == '\n') return;
   IR.ImpSend(SendRecBuffer, 38);
-  //delay(1000);
   IR.ClearNew();
   IR.EnableIRIn();
 }
 
 void IRReceive()
 {
-  if(IR.ready)                  // get IR data
+  if(IR.ready)                  
   {
   if ((IR.start_l < 50 && IR.start_h > 0) || (IR.start_h < 50 && IR.start_h > 0) || IR.MessageCharCount == 0)
   {
@@ -159,6 +165,10 @@ void IRReceive()
 
 void setup()
 {
+  /*
+  everytime the arduino connects to a host, it gets resetted
+  and starts here, after the setup method the loop()-method will be executed as an endless loop 
+  */
   Serial.begin(115200);
   ClearSendRecBuffer();
 
@@ -176,7 +186,8 @@ void setup()
 void loop()
 {
   if (ConToHost == false)
-  {    
+  {
+    //handshake loop    
     if (Serial.available())
     {
       SerRecieve();

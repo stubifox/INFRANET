@@ -1,20 +1,16 @@
 /*
- * IRremote
- * Version 0.11 August, 2009
- * Copyright 2009 Ken Shirriff
- * For details, see http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- *
- * Modified by Paul Stoffregen <paul@pjrc.com> to support other boards and timers
- * Modified  by Mitra Ardron <mitra@mitra.biz> 
- * Added Sanyo and Mitsubishi controllers
- * Modified Sony to spot the repeat codes that some Sony's send
+ * @author Kai Fischer
+ * @email kathunfischer@googlemail.com
+ * @desc implementation of the classes in "IRSendRev.h"
  * 
- * Modifier by
- * Interrupt code based on NECIRrcv by Joe Knapp
- * http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1210243556
- * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
- *
- * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
+ * @info    this is a modified version of the original "https://github.com/Seeed-Studio/IRSendRev/blob/master/IRSendRev.cpp"
+ *          to fit the needs of the InfranetProjekt, like other send and recieve methods
+ *          alot was changed, mostly little parts, but the recieve and send function were changed completely 
+ * 
+ *          i tried to mark every modification. Search for "modified"
+ * 
+ *          the main reason was this wasting :
+ *          -> search for "funny wasting"
  */
 
 #include "IRSendRev.h"
@@ -83,6 +79,7 @@ void IRSendRev::EnableIROut(int khz)
   TIMER_ENABLE_PWM;
 }
 
+//modified:
 void IRSendRev::ClearNew()
 {
   IRBufferCounter = 0;
@@ -128,6 +125,8 @@ void IRSendRev::Init()
   delay(20);
   ClearNew();
 }
+// end modified
+
 // initialization
 void IRSendRev::EnableIRIn()
 {
@@ -153,6 +152,7 @@ void IRSendRev::EnableIRIn()
   pinMode(irparams.recvpin, INPUT);
 }
 
+// modified:
 void CombineIRBuffer()
 {
   if (IR.first == 0)
@@ -205,6 +205,7 @@ void incstuff()
   Serial.println("ja");
   CombineIRBuffer();
 }
+// end modified
 
 // TIMER2 interrupt code to collect raw data.
 // Widths of alternating SPACE, MARK are recorded in rawbuf.
@@ -224,8 +225,9 @@ ISR(TIMER_INTR_NAME)
   if (IR.MessageCharCount >= MaxMsgSize)
   {
     // Buffer overflow
+    // modified:
     IR.ValidateOrThrowInput();
-    //irparams.rcvstate = STATE_STOP;
+    //end modified
   }
   switch (irparams.rcvstate)
   {
@@ -240,13 +242,13 @@ ISR(TIMER_INTR_NAME)
       else
       {
         // gap just ended, record duration and start recording transmission
-        //irparams.rawlen = 0;
+        // modified:
         IR.IRBufferCounter = 0;
         IR.IRBuffer[IR.IRBufferCounter++] = irparams.timer;
         //irparams.rawbuf[irparams.rawlen++] = irparams.timer;
         if (IR.IRBufferCounter == 16 || IR.start_h == 0 || IR.start_l == 0 || IR.first == 0)
           CombineIRBuffer();
-
+        // end modified
         irparams.timer = 0;
         irparams.rcvstate = STATE_MARK;
       }
@@ -255,11 +257,11 @@ ISR(TIMER_INTR_NAME)
   case STATE_MARK: // timing MARK
     if (irdata == SPACE)
     { // MARK ended, record time
+      //modified: 
       IR.IRBuffer[IR.IRBufferCounter++] = irparams.timer;
-      //irparams.rawbuf[irparams.rawlen++] = irparams.timer;
       if (IR.IRBufferCounter == 16 || IR.start_h == 0 || IR.start_l == 0 || IR.first == 0)
         CombineIRBuffer();
-
+      // end modified
       irparams.timer = 0;
       irparams.rcvstate = STATE_SPACE;
     }
@@ -267,11 +269,11 @@ ISR(TIMER_INTR_NAME)
   case STATE_SPACE: // timing SPACE
     if (irdata == MARK)
     { // SPACE just ended, record it
+      // modified:
       IR.IRBuffer[IR.IRBufferCounter++] = irparams.timer;
-      //irparams.rawbuf[irparams.rawlen++] = irparams.timer;
       if (IR.IRBufferCounter == 16 || IR.start_h == 0 || IR.start_l == 0 || IR.first == 0)
         CombineIRBuffer();
-
+      // end modified
       irparams.timer = 0;
       irparams.rcvstate = STATE_MARK;
     }
@@ -283,7 +285,9 @@ ISR(TIMER_INTR_NAME)
         // Mark current code as ready for processing
         // Switch to STOP
         // Don't reset timer; keep counting space width
+        // modified:
         IR.ValidateOrThrowInput();
+        // end modified
         irparams.rcvstate = STATE_STOP;
       }
     }
@@ -297,11 +301,7 @@ ISR(TIMER_INTR_NAME)
   }
 }
 
-/*void IRSendRev::Clear()
-{
-  irparams.rcvstate = STATE_IDLE;
-  //irparams.rawlen = 0;
-}*/
+//modified : deleted the original "void IRSendRev::Clear()"
 
 // Decodes the received IR message
 // Returns 0 if no data ready, 1 if data ready.
@@ -315,99 +315,27 @@ int IRSendRev::decode(decode_results *results)
     return ERR;
   }
   // Throw away and start over
+  //modified:
   ClearNew();
+  // end modified
   return 1;
 }
 
 unsigned char IRSendRev::Recv(unsigned char *revData)
-{ /*
-  int count = results.rawlen;
-  int nshort = 0;
-  int nlong = 0;
-  int count_data = 0;
-
-  count_data = (count - 4) / 16;
-
-  for (int i = 0; i < 10; i++) // count nshort
-  {
-    nshort += results.rawbuf[3 + 2 * i];
-  }
-  nshort /= 10;
-
-  int i = 0;
-  int j = 0;
-  while (1) // count nlong
-  {
-    if (results.rawbuf[4 + 2 * i] > (2 * nshort))
-    {
-      nlong += results.rawbuf[4 + 2 * i];
-      j++;
-    }
-    i++;
-    if (j == 10)
-      break;
-    if ((4 + 2 * i) > (count - 10))
-      break;
-  }
-  nlong /= j;
-
-  int doubleshort = 2 * nshort;
-  for (i = 0; i < count_data; i++)
-  {
-    revData[i + D_DATA] = 0x00;
-    for (j = 0; j < 8; j++)
-    {
-      if (results.rawbuf[4 + 16 * i + j * 2] > doubleshort) // 1
-      {
-        revData[i + D_DATA] |= 0x01 << (7 - j);
-      }
-      else
-      {
-        revData[i + D_DATA] &= ~(0x01 << (7 - j));
-      }
-    }
-  }
-  revData[D_LEN] = count_data + 5;
-  revData[D_STARTH] = results.rawbuf[1];
-  revData[D_STARTL] = results.rawbuf[2];
-  revData[D_SHORT] = nshort;
-  revData[D_LONG] = nlong;
-  revData[D_DATALEN] = count_data;
-
-#if __DEBUG
-  Serial.print("\r\n*************************************************************\r\n");
-  Serial.print("len\t = ");
-  Serial.println(revData[D_LEN]);
-  Serial.print("start_h\t = ");
-  Serial.println(revData[D_STARTH]);
-  Serial.print("start_l\t = ");
-  Serial.println(revData[D_STARTL]);
-  Serial.print("short\t = ");
-  Serial.println(revData[D_SHORT]);
-  Serial.print("long\t = ");
-  Serial.println(revData[D_LONG]);
-  Serial.print("data_len = ");
-  Serial.println(revData[D_DATALEN]);
-  for (int i = 0; i < revData[D_DATALEN]; i++)
-  {
-    Serial.print(revData[D_DATA + i]);
-    Serial.print("\t");
-  }
-  Serial.print("\r\n*************************************************************\r\n");
-#endif
-
-  Clear(); // Receive the next value
-  return revData[D_LEN] + 1;
-*/
+{ 
+  //modified: deleted the logic, because this original function is not needed anymore
   return 0;
 }
 
 //if get some data from IR
 unsigned char IRSendRev::IsDta()
 {
+  //modified:
   return ((MessageCharCount != 0) ? 1 : 0);
+  // end modified
 }
 
+//modified:
 void IRSendRev::ImpSendRaw(unsigned int time, bool *toggleFlag)
 {
   if (*toggleFlag)
@@ -422,7 +350,7 @@ void IRSendRev::ImpSendRaw(unsigned int time, bool *toggleFlag)
   *toggleFlag = !(*toggleFlag);
 }
 
-// wrote my Own, cause their function succs regarding optimization
+// wrote a new send function to be able to send more data
 void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
 {
   int len = idata[D_LEN];
@@ -489,10 +417,13 @@ void IRSendRev::ImpSend(unsigned char *idata, unsigned char ifreq)
 
 void IRSendRev::ValidateOrThrowInput()
 {
-  // maybe filterig here could be possible but doing it in the main ard script is easier
+  // in an improved version a filter could be implemented here, but doing it in the py-scripts is easier for now
   ready = true;
 }
 
+//end modified
+
+//not needed anymore but from the original:
 void IRSendRev::Send(unsigned char *idata, unsigned char ifreq)
 {
   int len = idata[0];
@@ -501,7 +432,9 @@ void IRSendRev::Send(unsigned char *idata, unsigned char ifreq)
   unsigned char nshort = idata[3];
   unsigned char nlong = idata[4];
   unsigned char datalen = idata[5];
-
+// funny wasting
+// the reason i bumped my head way too hard on my desk:
+// allocating 136 ((4+4*16)*2) byte for only 4 byte of payload: simply insane
   unsigned int *pSt = (unsigned int *)malloc((4 + datalen * 16) * sizeof(unsigned int));
 
   if (NULL == pSt)
