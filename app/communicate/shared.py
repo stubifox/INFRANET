@@ -31,3 +31,15 @@ class DictIndex(Enum):
     THEME = 'theme'
     ERROR = 'error'
     INFO = 'info'
+    LOCAL_ARDUINO_STATE = 'localArduinoState'
+    EXTERNAL_ARDUINO_STATE = 'externalArduinoState'
+    SHOULD_UPDATE_MESSAGES = 'shouldUpdateMessages'
+    NEW_MESSAGES = 'newMessages'
+    PARTNER_ID = 'partnerID'
+
+
+class RequestToken(Enum):
+    ARD_CON_STATE = 'ArdConState'
+    COMMUNICATION_STATE = 'CommunicationState'
+    __B_AUTH_KEY = 'PyToPyCom'
+    PARTNER_ID = 'PartnerID'

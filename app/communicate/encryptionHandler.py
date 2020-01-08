@@ -1,8 +1,9 @@
+# Author: Tim Heinze
+
 from diffiehellman.diffiehellman import DiffieHellman, MalformedPublicKey
 from cryptography.fernet import Fernet, InvalidToken
 from hashlib import blake2b
 import json
-import sqlite3
 import jsonpickle
 import base64
 from helperClasses import DataBaseUtilities, UniversalUtilities
@@ -15,18 +16,20 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         try:
             keyHandler.generate_shared_secret(foreignPublicKey)
+            self._insertKeyHandlerIntoDb(keyHandler)
         except MalformedPublicKey as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
-        self._insertKeyHandlerIntoDb(keyHandler)
 
     def encryptString(self, stringToEncrypt):
         '''Returns void if the encryption fails'''
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=32)
         try:
+            # Using blake2b hashing algorithm to shorten the shared_key
             blake.update(keyHandler.shared_key.encode())
+            # Using the shortened shared_key as encryption key
             fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
-            return fernet.encrypt(stringToEncrypt.encode())
+            return fernet.encrypt(json.dumps(stringToEncrypt).encode())
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
@@ -39,9 +42,11 @@ class EncryptionHandler:
         keyHandler = self._getKeyHandlerFromDb()
         blake = blake2b(digest_size=32)
         try:
+            # Using blake2b hashing algorithm to shorten the shared_key
             blake.update(keyHandler.shared_key.encode())
+            # Using the shortened shared_key as encryption key
             fernet = Fernet(base64.urlsafe_b64encode(blake.digest()))
-            return fernet.decrypt(encryptedByteArray)
+            return json.loads(fernet.decrypt(encryptedByteArray))
         except AttributeError as e:
             UniversalUtilities.sendErrorMessageToFrontend(e)
             return None
@@ -51,11 +56,11 @@ class EncryptionHandler:
 
     def getLocalPublicKey(self):
         '''Returns the local public_key as string'''
-        keyHandler = self._createAndSaveEncryptionKeys()
+        keyHandler = self._getKeyHandlerFromDb()
         return str(keyHandler.public_key)
 
-    def _createAndSaveEncryptionKeys(self):
-        keyHandler = DiffieHellman(group=5)
+    def _createAndSaveKeyHandler(self):
+        keyHandler = DiffieHellman(key_length=200, group=5)
         keyHandler.generate_public_key()
         self._insertKeyHandlerIntoDb(keyHandler)
         return keyHandler
@@ -71,5 +76,5 @@ class EncryptionHandler:
         statement = ''' SELECT value FROM settings WHERE key = 'keyHandlerJson' '''
         results = DataBaseUtilities.getValuesFromDb(statement)
         if len(results) == 0:
-            return self._createAndSaveEncryptionKeys()
+            return self._createAndSaveKeyHandler()
         return jsonpickle.decode(results[0]["value"])

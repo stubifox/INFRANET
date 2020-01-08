@@ -34,12 +34,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const AppHeader = props => {
-  const {
-    arduinoConnectedToSerial,
-    connectionEstablished,
-    userDefaults,
-    setuserDefaults
-  } = props;
+  const { externalStates, userDefaults, setuserDefaults } = props;
   const classes = useStyles();
 
   return (
@@ -49,8 +44,8 @@ export const AppHeader = props => {
           <Typography variant="h6" className={classes.title}>
             INFRACHAT
           </Typography>
-          {arduinoConnectedToSerial &&
-            (connectionEstablished ? (
+          {externalStates.internalArduinoConnected &&
+            (externalStates.externalArduinoConnected ? (
               <Tooltip title="Connected to Chatpartner!" placement="bottom">
                 <SettingsInputAntennaIcon className={classes.icon} />
               </Tooltip>
@@ -59,7 +54,7 @@ export const AppHeader = props => {
                 <PortableWifiOffIcon className={classes.icon} />
               </Tooltip>
             ))}
-          {arduinoConnectedToSerial ? (
+          {externalStates.internalArduinoConnected ? (
             <Tooltip title="Secure Connection to Device!" placement="bottom">
               <PhonelinkLockIcon className={classes.icon} />
             </Tooltip>

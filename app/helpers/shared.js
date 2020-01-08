@@ -9,7 +9,12 @@ export const Action = {
   UPDATE_THEME: 8,
   INSERT: 9,
   ERROR: "error",
-  INFO: "info"
+  INFO: "info",
+  LOCAL_ARDUINO_STATE: "localArduinoState",
+  EXTERNAL_ARDUINO_STATE: "externalArduinoState",
+  SHOULD_UPDATE_MESSAGES: "shouldUpdateMessages",
+  NEW_MESSAGES: "newMessages",
+  PARTNER_ID: "partnerID"
 };
 
 export const SnackBarStyle = {

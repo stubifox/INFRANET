@@ -1,8 +1,12 @@
 import { app, BrowserWindow } from "electron";
+import { createPythonCon, pyConnections } from "./app/helpers/pyConnections";
+import { Action } from "./app/helpers/shared";
 let mainWindow = null;
+let pyListener = createPythonCon("PyToSerMain", "text");
 
 app.on("window-all-closed", () => {
   if (process.platform != "darwin") {
+    pyListener.terminate();
     app.quit();
   }
 });

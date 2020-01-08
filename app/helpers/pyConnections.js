@@ -13,7 +13,7 @@ import {
   createDefaultsData,
   createReceivingData
 } from "./createDataObjects";
-import uuidv1 from "uuid";
+//import uuidv1 from "uuid";
 import { Action, printLoggingOrErrorMessages } from "./shared";
 
 /**
@@ -43,8 +43,6 @@ export const pyConnections = {
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
-
-      console.error(message);
     });
 
     await pyShell.end((err, code, signal) => {
@@ -62,7 +60,7 @@ export const pyConnections = {
    * @param {'React.state'} messages the corresponding state to the state Function
    */
 
-  getFromDb: async (exp, setmessages, messages) => {
+  getFromDb: (exp, setmessages, messages) => {
     const pyShell = createPythonCon("getFromDb", "json");
     if (exp === Action.LOAD_MORE) {
       pyShell.send(createReceivingData(exp, messages[0].id));
@@ -70,14 +68,13 @@ export const pyConnections = {
       pyShell.send(createReceivingData(exp, ""));
     }
 
-    await pyShell.on("message", response => {
+    pyShell.on("message", response => {
       printLoggingOrErrorMessages(response);
-      console.log(response);
 
       if (exp === Action.INITIAL) {
         setmessages(response);
       } else if (exp === Action.ENTRY) {
-        setmessages([...messages, response[0]]);
+        return;
       } else if (exp === Action.LOAD_MORE) {
         setmessages([...response, ...messages]);
       } else {
@@ -100,7 +97,7 @@ export const pyConnections = {
    * @param {Action} exp an expression to say the func what to do
    */
 
-  userDefaultsHandler: ({ sender, userTheme }, setuserDefaults, exp) => {
+  userDefaultsHandler: ({ userTheme }, setuserDefaults, exp) => {
     const pyShell = createPythonCon("userDefaultsHandler", "json");
 
     /**
@@ -108,34 +105,17 @@ export const pyConnections = {
      * if so Python File will return the data.
      */
     if (exp === Action.INITIAL) {
-      pyShell.send(createDefaultsData("", "", Action.CHECK));
-    }
-
-    if (exp === Action.INSERT_UUID) {
-      const uuid = uuidv1();
-      setuserDefaults({ sender: uuid, userTheme: userTheme });
-      pyShell.send(createDefaultsData(uuid, userTheme, Action.INSERT));
+      pyShell.send(createDefaultsData(userTheme, Action.CHECK));
     }
 
     if (exp === Action.UPDATE_THEME) {
-      pyShell.send(createDefaultsData(sender, userTheme, Action.INSERT));
+      pyShell.send(createDefaultsData(userTheme, exp));
     }
 
     pyShell.on("message", message => {
       printLoggingOrErrorMessages(message);
-      console.log(message);
-      /**
-       * case: no data is held in the userDefaults in DB.
-       * Recursively calling this Function again when no data provided
-       * with exp insertUUID to insert into DB and create a uuid.
-       */
-      if (message.length === 0) {
-        pyConnections.userDefaultsHandler(
-          { sender: sender, userTheme: userTheme },
-          setuserDefaults,
-          Action.INSERT_UUID
-        );
-      } else if (exp === Action.INITIAL) {
+
+      if (exp === Action.INITIAL) {
         setuserDefaults({
           sender: message[0].value,
           userTheme: message[1].value === "True"
@@ -149,6 +129,40 @@ export const pyConnections = {
         `Python File userDefaultsHandler.py ended with code: ${code} and signal: ${signal}`
       );
     });
+  },
+
+  getExternalStateChanges: (
+    { internalArduinoConnected, externalArduinoConnected, chatPartnerUUID },
+    setExternalStates,
+    messages,
+    setmessages
+  ) => {
+    const pyShell = createPythonCon("updateExternalStates", "json");
+    if (messages.length > 0) {
+      const lastID = messages.slice(-1).pop().id;
+      pyShell.send(createReceivingData(Action.ID, lastID));
+    } else {
+      pyShell.send(createReceivingData(Action.INITIAL, undefined));
+    }
+    pyShell.on("message", updates => {
+      printLoggingOrErrorMessages(updates);
+
+      if (updates[Action.SHOULD_UPDATE_MESSAGES]) {
+        setmessages([...messages, ...updates[Action.NEW_MESSAGES]]);
+      } else {
+        setExternalStates({
+          internalArduinoConnected:
+            updates[Action.LOCAL_ARDUINO_STATE] === "True",
+          externalArduinoConnected:
+            updates[Action.EXTERNAL_ARDUINO_STATE] === "True",
+          chatPartnerUUID: updates[Action.PARTNER_ID]
+        });
+      }
+    });
+
+    pyShell.end((err, code, signal) => {
+      if (err) throw err;
+    });
   }
 };
 
@@ -157,7 +171,7 @@ export const pyConnections = {
  * @param {['json', 'text']} mode specifies the mode the data is send to Python
  * @returns {'PythonShell'} pyShell returns a Python Shell instance
  */
-const createPythonCon = (fileName, mode) => {
+export const createPythonCon = (fileName, mode) => {
   return new PythonShell(
     join(__dirname, "..", "communicate", `${fileName}.py`),
     {
