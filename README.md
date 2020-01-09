@@ -7,7 +7,7 @@
   
   This Product is not Sponsored by the Hardware Company.
   
-  If you want to purchase the tested Hardware, you will need an Infrared Emitter and an Infrared Sender from Seed Studio.
+  If you want to purchase the tested Hardware, you will need an Infrared Emitter and an Infrared Sender from Seeed Studio.
   
   If you want to use you Own Infrared Sensors you might experience Bugs or a no functionality at all.
   
