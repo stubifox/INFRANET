@@ -1,6 +1,7 @@
 # INFRANET
 
-### The final Product can be downloaded from the Releases Page.
+## [The procuct can be downloaded from the releases Page](https://github.com/stubifox/INFRANET/releases)
+
 
 ## Development:
 ## Informations before installing:
