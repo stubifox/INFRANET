@@ -26,10 +26,10 @@ chat@infranet:~$ npm install -g yarn
 ### Setting up the environment:
 
 ```console
-chat@infranet:~$ git clone <hier ssh oder https von dem repo> #moeglicherweise muesst ihr euch noch ein ssh key anlegen
+chat@infranet:~$ git clone <ssh or https of this repo>
 chat@infranet:~$ cd INFRANET
 chat@infranet:~$ python -m venv venv
-(chat@infranet:~$ source venv/bin/activate #Linux oder Mac)
+chat@infranet:~$ source venv/bin/activate #Linux or Mac
 chat@infranet:~$ source venv/Scripts/activate #Windows
 chat@infranet:~$ yarn
 chat@infranet:~$ yarn start
