@@ -1,11 +1,12 @@
 # INFRANET
 
+### The final Product can be downloaded from the Releases Page.
 
-## Information bevor der Installation:
+## Development:
+## Informations before installing:
 
 1. Python 3.6 required
-2. Node required (einfach neuste Version ziehen)
-3. ??? Windows Probleme
+2. Node required (newest Version)
 
 ### Debian Pre Installations:
 
@@ -14,7 +15,7 @@ chat@infranet:~$ sudo apt install pyvenv
 chat@infranet:~$ sudo apt -y install libgconf2-4  #ist anscheinend auf Deb nicht standard, gibt sonst fehler.
 ```
 
-### vor dem Clonen noch pruefen:
+### Check before Cloning:
 
 ```console
 chat@infranet:~$ node -v
@@ -22,7 +23,7 @@ chat@infranet:~$ npm -v
 chat@infranet:~$ npm install -g yarn
 ```
 
-### dann:
+### Setting up the environment:
 
 ```console
 chat@infranet:~$ git clone <hier ssh oder https von dem repo> #moeglicherweise muesst ihr euch noch ein ssh key anlegen
@@ -35,9 +36,7 @@ chat@infranet:~$ yarn start
 
 ```
 
-Die Anwendung sollte nun starten... wahrscheinlich 
-
-das npm modul python-shell spielt hier eine wichtige rolle wie die beiden kommunizieren man koennte ja mal in die Doku schauen
+The Application should start now. It might happen, that you need to install required Python moudules manually using pip3.
 
 ## Deployment:
 
@@ -46,8 +45,7 @@ $ yarn package-windows
 $ yarn package-debian
 ```
 
-Die Befehle erstellen jeweils ein Ordner der alles zum ausführen enthält. Diese Ordner zippen und hochladen.
 
 
-## Link zum Tagebuch:
+## Link for Hour-Management:
 https://docs.google.com/spreadsheets/d/1TWkekIDpQT2U8OpKi3ymxciaGM6Ei_RP9KROXNjyts4/edit?usp=sharing
