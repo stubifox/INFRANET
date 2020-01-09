@@ -2,8 +2,7 @@
 
 ## [The procuct can be downloaded from the releases Page](https://github.com/stubifox/INFRANET/releases)
 
-
-# DISCLAIMER!!!:
+# DISCLAIMER!!!: `#f03c15`
   The Product is only tested with dedicated Hardware from Speed Studio. Also the Code written is customized for this specific Hardware.
   This Product is not Sponsored by the Hardware Company.
   If you want to purchase the tested Hardware, you will need an Infrared Emitter and an Infrared Sender from Seed Studio.
@@ -46,7 +45,7 @@ chat@infranet:~$ yarn start
 
 ```
 
-The Application should start now. It might happen, that you need to install required Python moudules manually using pip3.
+The Application should start now. It might happen, that you need to install required Python moudules manually using pip3.!
 
 ## Deployment:
 
