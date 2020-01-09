@@ -4,9 +4,13 @@
 
 # ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) DISCLAIMER!:
   The Product is only tested with dedicated Hardware from Speed Studio. Also the Code written is customized for this specific Hardware.
+  
   This Product is not Sponsored by the Hardware Company.
+  
   If you want to purchase the tested Hardware, you will need an Infrared Emitter and an Infrared Sender from Seed Studio.
+  
   If you want to use you Own Infrared Sensors you might experience Bugs or a no functionality at all.
+  
   Opening a new Issue is very welcome.
 
 
