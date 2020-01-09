@@ -2,7 +2,7 @@
 
 ## [The procuct can be downloaded from the releases Page](https://github.com/stubifox/INFRANET/releases)
 
-# ![#f03c15](https://placehold.it/729X90/f03c15/000000?text=DISCLAIMER)
+# [#f03c15](https://placehold.it/729X90/f03c15/000000?text=DISCLAIMER)
   The Product is only tested with dedicated Hardware from Seeed Studio. Also the Code written is customized for this specific Hardware.
   
   This Product is not Sponsored by the Hardware Company.
