@@ -24,7 +24,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "electron": "^7.0.0",
+    "electron": "^13.6.6",
     "electron-packager": "^14.1.1"
   }
 }
